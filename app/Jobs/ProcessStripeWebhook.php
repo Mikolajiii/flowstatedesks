@@ -2,52 +2,54 @@
 
 namespace App\Jobs;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use Spatie\StripeWebhooks\Models\StripeWebhookCall;
-use App\Models\Order;
+use Spatie\WebhookClient\Jobs\ProcessWebhookJob;
 
-class ProcessStripeWebhook implements ShouldQueue
+class ProcessStripeWebhook extends ProcessWebhookJob
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    public StripeWebhookCall $webhookCall;
-
-    public function __construct(StripeWebhookCall $webhookCall)
-    {
-        $this->webhookCall = $webhookCall;
-    }
-
     public function handle()
     {
-        $eventType = $this->webhookCall->payload['type'];
-        $object    = $this->webhookCall->payload['data']['object'];
+        $webhook = $this->webhookCall;
+        $payload = $webhook->payload;
 
+        $eventType = $payload['type'] ?? null;
+        $object    = $payload['data']['object'] ?? [];
+
+        // Log event type
+        \Log::info("Processing Stripe webhook: {$eventType}");
+
+        // Build a clean, admin-friendly record
+        $processed = [
+            'event_id'      => $payload['id'] ?? null,
+            'event_type'    => $eventType,
+            'object_type'   => $object['object'] ?? null,
+            'amount'        => $object['amount'] ?? null,
+            'currency'      => $object['currency'] ?? null,
+            'customer'      => $object['customer'] ?? null,
+            'payment_intent'=> $object['payment_intent'] ?? null,
+            'charge'        => $object['charge'] ?? null,
+            'status'        => $object['status'] ?? null,
+            'metadata'      => $object['metadata'] ?? [],
+            'raw'           => $payload, // keep full JSON too
+        ];
+
+        // Save everything into your webhook table
+        $webhook->update([
+            'processed_payload' => $processed,
+            'exception' => null,
+        ]);
+
+        // Handle specific Stripe events
         switch ($eventType) {
+            case 'payment_intent.succeeded':
+                // your logic here
+                break;
+
+            case 'charge.succeeded':
+                // your logic here
+                break;
 
             case 'checkout.session.completed':
-                $session = $object;
-
-                Order::create([
-                    'stripe_session_id' => $session['id'],
-                    'customer_email'    => $session['customer_details']['email'] ?? null,
-                    'product_name'      => $session['metadata']['product'] ?? 'Unknown',
-                    'amount_total'      => $session['amount_total'],
-                    'payment_status'    => 'paid',
-                    'payout_status'     => 'pending',
-                    'raw_payload'       => $session,
-                ]);
-                break;
-
-            case 'payment_intent.succeeded':
-                // You can update an existing order here if needed
-                break;
-
-            default:
-                // Ignore or log other events
+                // your logic here
                 break;
         }
     }

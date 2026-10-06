@@ -197,7 +197,7 @@
 
                                 <div class="mt-10">
                                     <form action="{{ route('checkout') }}" method="POST">
-                                        <input type="hidden" name="product" value="mini">
+                                        <input type="hidden" name="product" value="pro">
 
                                         <button
                                             class="px-6 py-3 rounded-full bg-neutral-900 text-white text-sm font-semibold hover:bg-neutral-700 transition shadow-md">
@@ -465,7 +465,7 @@
 
                                 <div class="mt-10">
                                     <form action="{{ route('checkout') }}" method="POST">
-                                        <input type="hidden" name="product" value="mini">
+                                        <input type="hidden" name="product" value="sidecar">
 
                                         <button
                                             class="px-6 py-3 rounded-full bg-neutral-900 text-white text-sm font-semibold hover:bg-neutral-700 transition shadow-md">

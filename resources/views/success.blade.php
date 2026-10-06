@@ -76,7 +76,7 @@
     <div class="icon">✔️</div>
     <h1>Payment Successful!</h1>
     <p>Thank you for your purchase. Your transaction has been completed.</p>
-    <a href="index.html" class="btn">Return Home</a>
+    <a href="/" class="btn">Return Home</a>
 </div>
 </body>
 </html>

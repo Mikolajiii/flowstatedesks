@@ -1,5 +1,7 @@
 <?php
 
+
+use App\Http\Controllers\Admin\StripeDashboardController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
@@ -41,18 +43,26 @@ Route::get('/test-email', function () {
 route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
 
 
-Route::stripeWebhooks('stripe/webhook');
+
+Route::stripeWebhooks('stripe/webhook')
+    ->withoutMiddleware(['web', 'csrf']);
+
+
+
+
+
 
 
 //stripe  admin routes
-//make middleware for admin routes using ADMIN_KEY=supersecret_9283hdsf in .env file later
-Route::prefix('admin')->group(function () {
-    Route::get('/orders', [\App\Http\Controllers\Admin\OrderController::class, 'index'])->name('admin.orders');
-    Route::get('/orders/{id}', [\App\Http\Controllers\Admin\OrderController::class, 'show'])->name('admin.orders.show');
 
-    Route::get('/stripe/balance', [\App\Http\Controllers\Admin\StripeController::class, 'balance'])->name('admin.stripe.balance');
-    Route::get('/stripe/payouts', [\App\Http\Controllers\Admin\StripeController::class, 'payouts'])->name('admin.stripe.payouts');
+Route::get('/admin/stripe', function () {
+    return view('admin.stripe.dashboard');
+})->name('admin.stripe.dashboard');
 
-    Route::get('/webhooks', [\App\Http\Controllers\Admin\WebhookController::class, 'index'])->name('admin.webhooks');
+Route::prefix('admin/stripe')->group(function () {
+    Route::get('/orders', [StripeDashboardController::class, 'orders'])->name('admin.stripe.orders');
+    Route::get('/orders/{id}', [StripeDashboardController::class, 'orderShow'])->name('admin.stripe.orders.show');
+
+    Route::get('/transactions', [StripeDashboardController::class, 'transactions'])->name('admin.stripe.transactions');
+    Route::get('/transactions/{id}', [StripeDashboardController::class, 'transactionShow'])->name('admin.stripe.transactions.show');
 });
-
