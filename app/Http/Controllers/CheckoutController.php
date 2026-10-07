@@ -17,6 +17,12 @@ class CheckoutController extends Controller
             'mini'    => 'price_1U31WMQnlXfHzKD34xJQdr5u',
             'sidecar' => 'price_1U31Y8QnlXfHzKD37qgJrffc'
         ];
+        $descriptions = [
+            'pro'     => 'FlowState Pro Desk – Full size workstation',
+            'mini'    => 'FlowState Mini Desk – Compact workspace',
+            'sidecar' => 'FlowState Sidecar – Add‑on extension surface'
+        ];
+
 
         $product = $request->product;
 
@@ -32,9 +38,11 @@ class CheckoutController extends Controller
                 'allowed_countries' => ['CA'],
             ],
             'metadata' => [
-                'product'  => $product,
-                'price_id' => $prices[$product],
+                'product'      => $product,
+                'price_id'     => $prices[$product],
+                'description'  => $descriptions[$product],
             ],
+
             'line_items' => [[
                 'price' => $prices[$product],
                 'quantity' => 1,

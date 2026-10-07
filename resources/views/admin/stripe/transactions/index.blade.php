@@ -11,6 +11,7 @@
         <tr>
             <th class="px-3 py-2 text-left">ID</th>
             <th class="px-3 py-2 text-left">Event</th>
+            <th class="px-3 py-2 text-left">Name</th>
             <th class="px-3 py-2 text-right">Amount</th>
             <th class="px-3 py-2 text-left">Currency</th>
             <th class="px-3 py-2 text-left">Created</th>
@@ -35,6 +36,11 @@
             <tr>
                 <td class="px-3 py-2 text-left">{{ $txn->id }}</td>
                 <td class="px-3 py-2 text-left">{{ $eventType }}</td>
+                <td class="px-3 py-2 text-left">
+                    {{ $txn->buyer_name ?? 'N/A' }}
+                </td>
+
+
                 <td class="px-3 py-2 text-right">
                     @if(!is_null($amount))
                         ${{ number_format($amount / 100, 2) }}

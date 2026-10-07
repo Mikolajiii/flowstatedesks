@@ -13,6 +13,8 @@
             <th class="px-3 py-2 text-left">ID</th>
             <th class="px-3 py-2 text-left">Event</th>
             <th class="px-3 py-2 text-left">Customer</th>
+            <th class="px-3 py-2 text-left">Email</th>
+            <th class="px-3 py-2 text-left">Product</th>
             <th class="px-3 py-2 text-right">Amount</th>
             <th class="px-3 py-2 text-left">Currency</th>
             <th class="px-3 py-2 text-left">Created</th>
@@ -70,11 +72,21 @@
 
                         // 4. FINAL FALLBACK → show customer ID instead of N/A
                         if (!$email && isset($session['customer'])) {
-                            $email = $session['customer']; // e.g., cus_VORn3C6xSWqs5w
+                            $email = $session['customer']; // e.g., cus_XXXX
                         }
                     @endphp
 
                     {{ $name ?? $email ?? 'N/A' }}
+                </td>
+
+                <td class="px-3 py-2 text-left">
+                    {{ $email ?? 'N/A' }}
+                </td>
+
+
+                <td class="px-3 py-2 text-left">
+                    {{ $order->description ?? 'N/A' }}
+
                 </td>
 
 
