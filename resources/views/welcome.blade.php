@@ -7,11 +7,16 @@
 
     <!-- HERO SECTION -->
     <section
-        class="relative w-full h-[80vh] bg-cover bg-center bg-no-repeat"
+        class="
+        relative w-full min-h-screen
+        bg-cover bg-center bg-no-repeat
+        overflow-hidden
+    "
         style="background-image: url('{{ Vite::asset('resources/images/other_photos/hero_section.webp') }}');"
     >
 
-        <!-- Dark overlay -->
+
+    <!-- Dark overlay -->
         <div class="absolute inset-0 bg-black/25"></div>
 
         <!-- NAV + LOGO -->
@@ -59,48 +64,42 @@
         <!-- HERO CONTENT -->
 
         <!-- HERO CONTENT -->
+        <!-- HERO CONTENT -->
         <div
             class="
         relative z-10
-        max-w-6xl   /* ⭐ match the nav container width */
-        mx-auto
-        px-6 md:px-8
+        w-full            /* ⭐ full width, no container */
+         pl-0 md:pl-100            /* ⭐ remove horizontal padding */
         flex flex-col md:flex-row
         items-start
         justify-start
+        mt-20
     "
         >
 
-            <!-- LEFT COLUMN (aligned with Flow Pro link) -->
-            <!-- LEFT COLUMN -->
-            <div class="
-    mt-6 md:mt-10
-    w-full md:w-1/2
-    text-center md:text-left   /* ⭐ center on small, left on desktop */
-">
-                <h1 class="text-4xl md:text-6xl font-semibold leading-tight text-white drop-shadow-lg">
+            <!-- LEFT COLUMN (extreme left) -->
+            <div class="mt-6 md:mt-10 w-full md:w-1/2 text-left pl-4 md:pl-0">
+                <h1 class="text-4xl md:text-7xl font-semibold leading-tight text-white drop-shadow-lg">
                     A studio desk built<br>
                     for modern creators.
                 </h1>
 
-                <p class="
-        text-neutral-200
-        max-w-xl
-        mt-4 md:mt-6
-        text-base md:text-lg
-        drop-shadow
-        mx-auto md:mx-0          /* ⭐ center paragraph on small, left on desktop */
-    ">
+                <p class="text-neutral-200  max-w-xl mt-4 md:mt-6 text-base md:text-2xl drop-shadow">
                     A clean, ergonomic workspace designed for producers, designers, and artists who demand clarity,
                     comfort, and room for inspiration.
                 </p>
             </div>
 
-
             <!-- RIGHT COLUMN (empty on desktop) -->
             <div class="hidden md:block w-1/2"></div>
 
         </div>
+
+
+        <!-- RIGHT COLUMN (empty on desktop) -->
+            <div class="hidden md:block w-1/2"></div>
+
+
 
 
 
@@ -111,7 +110,30 @@
 
     <!-- FlowState Pro -->
     <section id="FlowState_Pro" class="bg-white">
-        <div class="w-full px-6 py-16">
+        <div class="container mx-auto px-6 py-16">
+
+            <button
+                @click="open = true"
+                class="relative flex items-center gap-2 text-neutral-900 hover:text-neutral-700"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="w-6 h-6"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor"
+                     stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M3 3h2l3 12h10l3-8H6" />
+                </svg>
+
+                <span>Cart</span>
+
+                <span
+                    x-show="badgeCount > 0"
+                    x-text="badgeCount"
+                    class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5"
+                ></span>
+            </button>
 
             <div class="flex flex-col lg:flex-row gap-12 items-start">
 
@@ -270,7 +292,7 @@
 
     <!-- FlowState Mini -->
     <section id="FlowState_Mini" class="bg-white">
-        <div class="w-full px-6 py-16">
+        <div class="container mx-auto px-6 py-16">
 
             <div class="flex flex-col lg:flex-row gap-12 items-start">
 
@@ -425,7 +447,7 @@
     </section>
     <!-- Product: FlowState Sidecar -->
     <section id="FlowState_SideCar" class="bg-white">
-        <div class="w-full px-6 py-16">
+        <div class="container mx-auto px-6 py-16">
 
             <div class="flex flex-col lg:flex-row gap-12 items-start">
 
