@@ -6,30 +6,32 @@
 
     <!-- Backdrop (fade in/out) -->
     <div
-        class="fixed inset-0 bg-black/40"
+        x-show="open"
+        class="fixed inset-0 bg-black/40 backdrop-blur-sm"
         @click="open = false"
         x-transition.opacity.duration.300ms
     ></div>
 
     <!-- Drawer Panel (slide in/out) -->
     <div
+        x-show="open"
+        x-cloak
         class="relative z-50 h-full w-full sm:w-[400px] bg-white shadow-2xl flex flex-col"
 
         x-init="rehydrate({{ json_encode($cart ?? []) }})"
 
         x-transition:enter="transform transition ease-[cubic-bezier(.25,.8,.25,1)] duration-500"
-
         x-transition:enter-start="translate-x-full"
         x-transition:enter-end="translate-x-0"
 
         x-transition:leave="transform transition ease-in duration-400"
         x-transition:leave-start="translate-x-0"
         x-transition:leave-end="translate-x-full"
-
     >
 
 
-        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+
+    <div class="flex-1 overflow-y-auto p-6 space-y-6">
             <form action="{{ route('cart.update') }}" method="POST">
                 @csrf
 
@@ -117,7 +119,8 @@
         <div class="p-6 border-t space-y-4">
             <div class="flex items-center justify-between text-lg font-semibold">
                 <span>Subtotal</span>
-                <span x-text="'$' + (subtotal / 100).toFixed(2)"></span>
+                <span x-text="'$' + (subtotal / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })"></span>
+
             </div>
 
             <button

@@ -205,11 +205,12 @@
                                                class="border rounded px-3 py-2 mb-3 w-24">
 
                                         <button
+                                            type="submit"
                                             class="px-6 py-3 rounded-full bg-neutral-900 text-white text-sm font-semibold hover:bg-neutral-700 transition shadow-md"
-                                            @click="$nextTick(() => open = true)"
                                         >
                                             Add to Cart
                                         </button>
+
 
 
 
@@ -356,11 +357,12 @@
                                                class="border rounded px-3 py-2 mb-3 w-24">
 
                                         <button
+                                            type="submit"
                                             class="px-6 py-3 rounded-full bg-neutral-900 text-white text-sm font-semibold hover:bg-neutral-700 transition shadow-md"
-                                            @click="$nextTick(() => open = true)"
                                         >
                                             Add to Cart
                                         </button>
+
 
 
                                     </form>
@@ -517,11 +519,12 @@
                                                class="border rounded px-3 py-2 mb-3 w-24">
 
                                         <button
+                                            type="submit"
                                             class="px-6 py-3 rounded-full bg-neutral-900 text-white text-sm font-semibold hover:bg-neutral-700 transition shadow-md"
-                                            @click="$nextTick(() => open = true)"
                                         >
                                             Add to Cart
                                         </button>
+
 
 
                                     </form>

@@ -6,13 +6,11 @@
     @open-cart.window="open = true"
     x-init="
         rehydrate({{ json_encode(session('cart', [])) }});
-       @if(session('cart_open'))
-    $nextTick(() => open = true);
-@endif
-
+        {{ session('cart_open') ? '$nextTick(() => open = true);' : '' }}
     "
     x-cloak
 >
+
 
 
 <header class="flex items-center justify-center px-6 py-4 border-b">

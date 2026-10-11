@@ -10,18 +10,26 @@ function cartDrawer(initialItems = {}) {
         showEmptyPopup: false,
         badgeCount: 0,
 
+        // ⭐ Alpine lifecycle
         init() {
-            this.rehydrate(initialItems);
-            // ⭐ THIS is the correct place
+            // ⭐ REQUIRED: expose Alpine instance globally
+            // This prevents hydration timing issues and flicker
+            window.cartDrawerInstance = this;
 
+            // ⭐ Hydrate AFTER Alpine is fully mounted
+            // This avoids the “instant pop” before transitions
+            this.$nextTick(() => {
+                this.rehydrate(initialItems);
+            });
         },
 
-        // ⭐ NEW: full rehydration support
+        // ⭐ Hydrate cart items
         rehydrate(newItems) {
             this.items = newItems || {};
             this.recalculate();
         },
 
+        // ⭐ Recalculate totals
         recalculate() {
             this.subtotal = Object.values(this.items)
                 .reduce((t, i) => t + (i.price * i.qty), 0);
@@ -30,6 +38,7 @@ function cartDrawer(initialItems = {}) {
                 .reduce((t, i) => t + i.qty, 0);
         },
 
+        // ⭐ Quantity controls
         increment(key) {
             if (!this.items[key]) return;
             this.items[key].qty++;
@@ -56,5 +65,8 @@ function cartDrawer(initialItems = {}) {
     };
 }
 
+// ⭐ Register Alpine component factory
 window.cartDrawer = cartDrawer;
+
+// ⭐ Start Alpine
 Alpine.start();
