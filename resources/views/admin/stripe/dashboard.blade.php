@@ -7,7 +7,7 @@
 
         <!-- Orders Button -->
         <a href="{{ route('admin.stripe.orders') }}"
-           class="px-8 py-4 bg-blue-600 text-white rounded-lg text-xl font-semibold shadow hover:bg-blue-700 transition">
+           class="px-8 py-4 bg-green-600 text-white rounded-lg text-xl font-semibold shadow hover:bg-green-700 transition">
             Orders
         </a>
 
@@ -16,6 +16,12 @@
            class="px-8 py-4 bg-green-600 text-white rounded-lg text-xl font-semibold shadow hover:bg-green-700 transition">
             Transactions
         </a>
+        <!-- Go back to main website -->
+        <a href="{{ route('home') }}"
+           class="px-8 py-4 bg-green-600 text-white rounded-lg text-xl font-semibold shadow hover:bg-green-700 transition">
+            Main Web Page
+        </a>
+
 
     </div>
 @endsection

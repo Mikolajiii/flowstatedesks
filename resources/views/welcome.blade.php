@@ -1,6 +1,9 @@
 @extends('layouts.master')
 
 @section('content')
+    <div x-data></div>
+
+    <!-- ⭐ MUST BE HERE -->
 
     <!-- HERO SECTION -->
     <section
@@ -87,9 +90,6 @@
         </div>
 
     </section>
-
-
-
 
 
 
@@ -196,14 +196,40 @@
                                 <P>Height - 29" (lower tier)</P>
 
                                 <div class="mt-10">
-                                    <form action="{{ route('checkout') }}" method="POST">
+                                    <form action="{{ route('cart.add') }}" method="POST">
+                                        @csrf
                                         <input type="hidden" name="product" value="pro">
 
+                                        <label class="block mb-2 text-sm text-neutral-700">Quantity</label>
+                                        <input type="number" name="qty" value="1" min="1"
+                                               class="border rounded px-3 py-2 mb-3 w-24">
+
                                         <button
-                                            class="px-6 py-3 rounded-full bg-neutral-900 text-white text-sm font-semibold hover:bg-neutral-700 transition shadow-md">
+                                            class="px-6 py-3 rounded-full bg-neutral-900 text-white text-sm font-semibold hover:bg-neutral-700 transition shadow-md"
+                                            @click="$nextTick(() => open = true)"
+                                        >
                                             Add to Cart
                                         </button>
+
+
+
                                     </form>
+                                    <button
+                                        @click="$dispatch('open-cart')"
+                                        class="flex items-center gap-2 text-neutral-900 hover:text-neutral-700"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                             class="w-6 h-6"
+                                             fill="none"
+                                             viewBox="0 0 24 24"
+                                             stroke="currentColor"
+                                             stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M3 3h2l3 12h10l3-8H6" />
+                                        </svg>
+                                        View Cart
+                                    </button>
+                                </div>
                                     <span class="mt-3 inline-flex items-center justify-center  text-purple-500
              text-md font-medium px-2 py-0.5 rounded-full">
     In stock — Free Shipping
@@ -212,12 +238,7 @@
                             </div>
                         </div>
 
-                        <!--<div>
-                            <p class="font-medium text-neutral-900">Materials</p>
-                            <p>Solid birch or oak top</p>
-                            <p>Powder‑coated steel frame</p>
-                            <p>Integrated cable channel</p>
-                        </div>-->
+
 
 
 
@@ -225,7 +246,7 @@
 
                 </div> <!-- closes .w-full px-6 py-16 -->
             </div>
-        </div>
+
 
 
     </section>
@@ -326,17 +347,40 @@
                                 <p>Height - 32 3/4" (top tier)</p>
                                 <p>Height - 29" (lower tier)</p>
                                 <div class="mt-10">
-                                    <form action="{{ route('checkout') }}" method="POST">
+                                    <form action="{{ route('cart.add') }}" method="POST">
                                         @csrf
-
                                         <input type="hidden" name="product" value="mini">
 
+                                        <label class="block mb-2 text-sm text-neutral-700">Quantity</label>
+                                        <input type="number" name="qty" value="1" min="1"
+                                               class="border rounded px-3 py-2 mb-3 w-24">
+
                                         <button
-                                            class="px-6 py-3 rounded-full bg-neutral-900 text-white text-sm font-semibold hover:bg-neutral-700 transition shadow-md">
+                                            class="px-6 py-3 rounded-full bg-neutral-900 text-white text-sm font-semibold hover:bg-neutral-700 transition shadow-md"
+                                            @click="$nextTick(() => open = true)"
+                                        >
                                             Add to Cart
                                         </button>
+
+
                                     </form>
 
+                                    <button
+                                        @click="$dispatch('open-cart')"
+                                        class="flex items-center gap-2 text-neutral-900 hover:text-neutral-700"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                             class="w-6 h-6"
+                                             fill="none"
+                                             viewBox="0 0 24 24"
+                                             stroke="currentColor"
+                                             stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M3 3h2l3 12h10l3-8H6" />
+                                        </svg>
+                                        View Cart
+                                    </button>
+                                </div>
                                     <span class="mt-3 inline-flex items-center justify-center  text-purple-500
              text-md font-medium px-2 py-0.5 rounded-full">
     In stock — Free Shipping
@@ -464,14 +508,39 @@
                                 <p>Height - 29"</p>
 
                                 <div class="mt-10">
-                                    <form action="{{ route('checkout') }}" method="POST">
+                                    <form action="{{ route('cart.add') }}" method="POST">
+                                        @csrf
                                         <input type="hidden" name="product" value="sidecar">
 
+                                        <label class="block mb-2 text-sm text-neutral-700">Quantity</label>
+                                        <input type="number" name="qty" value="1" min="1"
+                                               class="border rounded px-3 py-2 mb-3 w-24">
+
                                         <button
-                                            class="px-6 py-3 rounded-full bg-neutral-900 text-white text-sm font-semibold hover:bg-neutral-700 transition shadow-md">
+                                            class="px-6 py-3 rounded-full bg-neutral-900 text-white text-sm font-semibold hover:bg-neutral-700 transition shadow-md"
+                                            @click="$nextTick(() => open = true)"
+                                        >
                                             Add to Cart
                                         </button>
+
+
                                     </form>
+                                    <button
+                                        @click="$dispatch('open-cart')"
+                                        class="flex items-center gap-2 text-neutral-900 hover:text-neutral-700"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                             class="w-6 h-6"
+                                             fill="none"
+                                             viewBox="0 0 24 24"
+                                             stroke="currentColor"
+                                             stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M3 3h2l3 12h10l3-8H6" />
+                                        </svg>
+                                        View Cart
+                                    </button>
+                                </div>
                                     <span class="mt-3 inline-flex items-center justify-center  text-purple-500
              text-md font-medium px-2 py-0.5 rounded-full">
     In stock — Free Shipping
@@ -479,23 +548,14 @@
                                 </div>
                             </div>
 
-                            <!-- <div>
-                                 <p class="font-medium text-neutral-900">Materials</p>
-                                 <p>Solid birch or oak top</p>
-                                 <p>Powder‑coated steel frame</p>
-                                 <p>Integrated cable channel</p>
-                             </div>-->
 
-
-
-
-                        </div> <!-- closes .flex-1 space-y-6 -->
+                    </div> <!-- closes .flex-1 space-y-6 -->
 
                     </div> <!-- closes .flex flex-col lg:flex-row -->
 
                 </div> <!-- closes .max-w-7xl mx-auto -->
             </div>
-        </div>
+
     </section>
     <!-- ABOUT SECTION -->
     <section id="About" class="w-full bg-white py-20  border-neutral-200">
@@ -627,7 +687,13 @@
 
 
 
+    {{--@include('cart.drawer')--}}
+
+
+
     @include('partials.footer_content')
+
+
 
 
 

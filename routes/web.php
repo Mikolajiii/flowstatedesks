@@ -2,6 +2,7 @@
 
 
 use App\Http\Controllers\Admin\StripeDashboardController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
@@ -9,12 +10,28 @@ use App\Services\SendGridService;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/', function () {
+    return view('welcome');
+})->name('home');
+
+
 Route::view('/terms', 'terms')->name('terms');
 Route::view('/shipping', 'shipping')->name('shipping');
 Route::view('/faq', 'FAQ')->name('faq');
+
+
 Route::get('/payment/success', function () {
+
+    // Clear the cart after successful payment
+    session()->forget('cart');
+
     return view('success');
 })->name('payment.success');
+
+
+
+
 
 Route::get('/payment/cancel', function () {
     return view('cancel');
@@ -39,9 +56,21 @@ Route::get('/test-email', function () {
     return $success ? 'Email sent!' : 'SendGrid failed.';
 });
 
+//shopping cart routes
 
-route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
+/* route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
+Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
+Route::post('/cart/remove/{key}', [CartController::class, 'remove'])->name('cart.remove');
+Route::post('/cart/clear', function () {
+    session()->forget('cart');
+    return response()->json(['status' => 'cleared']);
+});
 
+*/
+Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
+Route::post('/cart/remove/{product}', [CartController::class, 'remove'])->name('cart.remove');
+Route::get('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
 
 
 Route::stripeWebhooks('stripe/webhook')
@@ -66,3 +95,8 @@ Route::prefix('admin/stripe')->group(function () {
     Route::get('/transactions', [StripeDashboardController::class, 'transactions'])->name('admin.stripe.transactions');
     Route::get('/transactions/{id}', [StripeDashboardController::class, 'transactionShow'])->name('admin.stripe.transactions.show');
 });
+
+//cart routes
+Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+Route::get('/cart', [CartController::class, 'view'])->name('cart.view');
+Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
