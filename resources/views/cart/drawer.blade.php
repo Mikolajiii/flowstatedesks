@@ -48,63 +48,61 @@
                             <div class="flex items-center gap-4 w-full">
                                 <img :src="item.image" class="w-16 h-16 rounded-lg object-cover">
 
-                                <!-- ⭐ Unified Icon Slot (Trash → Spinner → Checkmark) -->
+                                <!-- ⭐ Unified Icon Slot -->
                                 <div class="w-6 h-6 flex items-center justify-center">
 
                                     <!-- Spinner -->
-                                    <div x-show="loadingItem === key" class="slow-spin text-neutral-500">
-                                        <svg class="h-5 w-5" viewBox="0 0 24 24">
+                                    <template x-if="loadingItem === key">
+                                        <svg class="slow-spin h-5 w-5 text-neutral-500" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10"
                                                     stroke="currentColor" stroke-width="4" fill="none"></circle>
                                             <path class="opacity-75" fill="currentColor"
                                                   d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"></path>
                                         </svg>
-                                    </div>
+                                    </template>
 
                                     <!-- Checkmark -->
-                                    <div
-                                        x-show="successItem === key"
-                                        x-transition.opacity.duration.800ms
-                                        class="text-green-600 pointer-events-none"
-                                    >
-                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="3"
+                                    <template x-if="successItem === key">
+                                        <svg class="h-5 w-5 text-green-600"
+                                             fill="none" stroke="currentColor" stroke-width="3"
                                              viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                   d="M5 13l4 4L19 7" />
                                         </svg>
-                                    </div>
+                                    </template>
 
-                                    <!-- Trash Can -->
-                                    <button
-                                        x-show="loadingItem !== key && successItem !== key"
-                                        type="button"
-                                        class="text-red-600 hover:text-red-800"
-                                        @click="
-                                            fetch('{{ url('/cart/remove') }}/' + key, {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/json',
-                                                    'Accept': 'application/json',
-                                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                                }
-                                            })
-                                            .then(res => res.json())
-                                            .then(data => {
-                                                cartDrawerInstance.rehydrate(data.cart);
-                                                cartDrawerInstance.open = true;
-                                            });
-                                        "
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                             class="h-5 w-5"
-                                             fill="none"
-                                             viewBox="0 0 24 24"
-                                             stroke="currentColor"
-                                             stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
+                                    <!-- Trash -->
+                                    <template x-if="loadingItem !== key && successItem !== key">
+                                        <button
+                                            type="button"
+                                            class="text-red-600 hover:text-red-800"
+                                            @click="
+                                                fetch('{{ url('/cart/remove') }}/' + key, {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                        'Accept': 'application/json',
+                                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                                    }
+                                                })
+                                                .then(res => res.json())
+                                                .then(data => {
+                                                    cartDrawerInstance.rehydrate(data.cart);
+                                                    cartDrawerInstance.open = true;
+                                                });
+                                            "
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                 class="h-5 w-5"
+                                                 fill="none"
+                                                 viewBox="0 0 24 24"
+                                                 stroke="currentColor"
+                                                 stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </template>
 
                                 </div>
 
@@ -146,7 +144,7 @@
                                     @click="updateQty(key, item.qty + 1)"
                                 >+</button>
 
-                                <!-- Spinner beside qty (optional) -->
+                                <!-- Optional spinner beside qty -->
                                 <div x-show="loadingItem === key" class="ml-2">
                                     <svg class="slow-spin h-5 w-5 text-neutral-500" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10"
@@ -159,6 +157,7 @@
                             </div>
 
                         </div>
+
                     </template>
                 </div>
 
