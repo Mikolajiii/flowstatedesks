@@ -10,14 +10,15 @@ function cartDrawer(initialItems = {}) {
         showEmptyPopup: false,
         badgeCount: 0,
 
-        // ⭐ Alpine lifecycle
+        // ⭐ NEW: per-item loading + success indicators
+        loadingItem: null,
+        successItem: null,
+
         init() {
-            // ⭐ REQUIRED: expose Alpine instance globally
-            // This prevents hydration timing issues and flicker
+            // Expose Alpine instance globally
             window.cartDrawerInstance = this;
 
-            // ⭐ Hydrate AFTER Alpine is fully mounted
-            // This avoids the “instant pop” before transitions
+            // Hydrate AFTER Alpine mounts
             this.$nextTick(() => {
                 this.rehydrate(initialItems);
             });
@@ -29,44 +30,75 @@ function cartDrawer(initialItems = {}) {
             this.recalculate();
         },
 
-        // ⭐ Recalculate totals
+        // ⭐ Recalculate totals + badge
         recalculate() {
-            this.subtotal = Object.values(this.items)
-                .reduce((t, i) => t + (i.price * i.qty), 0);
+            this.subtotal = Object.values(this.items).reduce((sum, item) => {
+                return sum + item.price * item.qty;
+            }, 0);
 
             this.badgeCount = Object.values(this.items)
                 .reduce((t, i) => t + i.qty, 0);
         },
 
-        // ⭐ Quantity controls
+        // ⭐ Auto-save quantity change (with spinner + checkmark)
+        updateQty(key, qty) {
+            if (!this.items[key]) return;
+
+            // Normalize qty
+            qty = Math.max(0, parseInt(qty, 10) || 0);
+
+            // Set local state immediately
+            this.items[key].qty = qty;
+            this.recalculate();
+
+            // Show spinner
+            this.loadingItem = key;
+            this.successItem = null;
+
+            // Send AJAX update
+            fetch('/cart/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ qty: { [key]: qty } })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    // Rehydrate cart from server
+                    this.rehydrate(data.cart);
+
+                    // Stop spinner
+                    this.loadingItem = null;
+
+                    // Show checkmark
+                    this.successItem = key;
+
+                    // Auto-hide checkmark
+                    setTimeout(() => {
+                        this.successItem = null;
+                    }, 1200);
+                });
+        },
+
+        // ⭐ Increment auto-saves
         increment(key) {
             if (!this.items[key]) return;
-            this.items[key].qty++;
-            this.recalculate();
+            this.updateQty(key, this.items[key].qty + 1);
         },
 
+        // ⭐ Decrement auto-saves
         decrement(key) {
             if (!this.items[key]) return;
-            if (this.items[key].qty > 1) {
-                this.items[key].qty--;
-            } else {
-                this.items[key].qty = 0;
-            }
-            this.recalculate();
-        },
-
-        updateQty(key, value) {
-            const v = parseInt(value, 10);
-            if (!this.items[key]) return;
-
-            this.items[key].qty = (isNaN(v) || v <= 0) ? 0 : v;
-            this.recalculate();
+            this.updateQty(key, this.items[key].qty - 1);
         }
     };
 }
 
-// ⭐ Register Alpine component factory
+// Register Alpine component
 window.cartDrawer = cartDrawer;
 
-// ⭐ Start Alpine
+// Start Alpine
 Alpine.start();

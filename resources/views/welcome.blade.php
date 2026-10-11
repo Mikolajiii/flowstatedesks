@@ -54,6 +54,28 @@
                         <a href="#FlowState_SideCar" class="text-white hover:text-purple-500 transition">Flow Side Car</a>
                         <a href="#About" class="text-white hover:text-purple-500 transition">About</a>
                     </div>
+                    <button
+                        @click="open = true"
+                        class="relative flex items-center gap-2  text-white hover:text-purple-500"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             class="w-6 h-6"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke="currentColor"
+                             stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M3 3h2l3 12h10l3-8H6" />
+                        </svg>
+
+                        <span>Cart</span>
+
+                        <span
+                            x-show="badgeCount > 0"
+                            x-text="badgeCount"
+                            class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5"
+                        ></span>
+                    </button>
 
                 </div>
 
@@ -63,8 +85,7 @@
 
         <!-- HERO CONTENT -->
 
-        <!-- HERO CONTENT -->
-        <!-- HERO CONTENT -->
+
         <div
             class="
         relative z-10
@@ -112,28 +133,7 @@
     <section id="FlowState_Pro" class="bg-white">
         <div class="container mx-auto px-6 py-16">
 
-            <button
-                @click="open = true"
-                class="relative flex items-center gap-2 text-neutral-900 hover:text-neutral-700"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg"
-                     class="w-6 h-6"
-                     fill="none"
-                     viewBox="0 0 24 24"
-                     stroke="currentColor"
-                     stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M3 3h2l3 12h10l3-8H6" />
-                </svg>
 
-                <span>Cart</span>
-
-                <span
-                    x-show="badgeCount > 0"
-                    x-text="badgeCount"
-                    class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5"
-                ></span>
-            </button>
 
             <div class="flex flex-col lg:flex-row gap-12 items-start">
 
@@ -234,13 +234,38 @@
                                 <P>Height - 29" (lower tier)</P>
 
                                 <div class="mt-10">
-                                    <form action="{{ route('cart.add') }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="product" value="pro">
+                                    <form
+                                        x-data
+                                        @submit.prevent="
+        fetch('{{ route('cart.add') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',     // ⭐ REQUIRED
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                product: 'pro',
+                qty: $event.target.qty.value
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            cartDrawerInstance.rehydrate(data.cart);
+            cartDrawerInstance.open = true;      // ⭐ drawer opens again
+        });
+    "
+                                    >
 
-                                        <label class="block mb-2 text-sm text-neutral-700">Quantity</label>
-                                        <input type="number" name="qty" value="1" min="1"
-                                               class="border rounded px-3 py-2 mb-3 w-24">
+                                    <label class="block mb-2 text-sm text-neutral-700">Quantity</label>
+
+                                        <input
+                                            type="number"
+                                            name="qty"
+                                            value="1"
+                                            min="1"
+                                            class="border rounded px-3 py-2 mb-3 w-24"
+                                        >
 
                                         <button
                                             type="submit"
@@ -248,11 +273,8 @@
                                         >
                                             Add to Cart
                                         </button>
-
-
-
-
                                     </form>
+
                                     <button
                                         @click="$dispatch('open-cart')"
                                         class="flex items-center gap-2 text-neutral-900 hover:text-neutral-700"
@@ -386,13 +408,38 @@
                                 <p>Height - 32 3/4" (top tier)</p>
                                 <p>Height - 29" (lower tier)</p>
                                 <div class="mt-10">
-                                    <form action="{{ route('cart.add') }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="product" value="mini">
+                                    <form
+                                        x-data
+                                        @submit.prevent="
+        fetch('{{ route('cart.add') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',     // ⭐ REQUIRED
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                product: 'mini',
+                qty: $event.target.qty.value
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            cartDrawerInstance.rehydrate(data.cart);
+            cartDrawerInstance.open = true;      // ⭐ drawer opens again
+        });
+    "
+                                    >
 
-                                        <label class="block mb-2 text-sm text-neutral-700">Quantity</label>
-                                        <input type="number" name="qty" value="1" min="1"
-                                               class="border rounded px-3 py-2 mb-3 w-24">
+                                    <label class="block mb-2 text-sm text-neutral-700">Quantity</label>
+
+                                        <input
+                                            type="number"
+                                            name="qty"
+                                            value="1"
+                                            min="1"
+                                            class="border rounded px-3 py-2 mb-3 w-24"
+                                        >
 
                                         <button
                                             type="submit"
@@ -400,10 +447,8 @@
                                         >
                                             Add to Cart
                                         </button>
-
-
-
                                     </form>
+
 
                                     <button
                                         @click="$dispatch('open-cart')"
@@ -548,13 +593,38 @@
                                 <p>Height - 29"</p>
 
                                 <div class="mt-10">
-                                    <form action="{{ route('cart.add') }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="product" value="sidecar">
+                                    <form
+                                        x-data
+                                        @submit.prevent="
+        fetch('{{ route('cart.add') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',     // ⭐ REQUIRED
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                product: 'sidecar',
+                qty: $event.target.qty.value
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            cartDrawerInstance.rehydrate(data.cart);
+            cartDrawerInstance.open = true;      // ⭐ drawer opens again
+        });
+    "
+                                    >
 
-                                        <label class="block mb-2 text-sm text-neutral-700">Quantity</label>
-                                        <input type="number" name="qty" value="1" min="1"
-                                               class="border rounded px-3 py-2 mb-3 w-24">
+                                    <label class="block mb-2 text-sm text-neutral-700">Quantity</label>
+
+                                        <input
+                                            type="number"
+                                            name="qty"
+                                            value="1"
+                                            min="1"
+                                            class="border rounded px-3 py-2 mb-3 w-24"
+                                        >
 
                                         <button
                                             type="submit"
@@ -562,10 +632,8 @@
                                         >
                                             Add to Cart
                                         </button>
-
-
-
                                     </form>
+
                                     <button
                                         @click="$dispatch('open-cart')"
                                         class="flex items-center gap-2 text-neutral-900 hover:text-neutral-700"

@@ -48,6 +48,15 @@ class CartController extends Controller
 
         session()->put('cart', $cart);
 
+        // ⭐ If AJAX request → return JSON
+        if ($request->expectsJson()) {
+            return response()->json([
+                'cart' => $cart,
+                'status' => 'updated'
+            ]);
+        }
+
+        // ⭐ Fallback for non-AJAX
         return redirect()->back()
             ->with('cart_open', true)
             ->with('cart_updated', true);
@@ -71,20 +80,42 @@ class CartController extends Controller
             }
         }
 
+        // If cart is now empty
         if (empty($cart)) {
             session()->forget('cart');
 
+            // ⭐ AJAX response
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'cart' => [],
+                    'status' => 'updated'
+                ]);
+            }
+
+            // ⭐ Fallback for non‑AJAX
             return redirect()->back()
                 ->with('cart_open', true)
                 ->with('cart_updated', true);
         }
 
+        // Save updated cart
         session()->put('cart', $cart);
 
+        // ⭐ AJAX response
+        if ($request->expectsJson()) {
+            return response()->json([
+                'cart' => $cart,
+                'status' => 'updated'
+            ]);
+        }
+
+        // ⭐ Fallback for non‑AJAX
         return redirect()->back()
             ->with('cart_open', true)
             ->with('cart_updated', true);
     }
+
+
 
     public function remove(string $product)
     {
@@ -96,12 +127,33 @@ class CartController extends Controller
 
         if (empty($cart)) {
             session()->forget('cart');
-        } else {
-            session()->put('cart', $cart);
+
+            // ⭐ AJAX response
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'cart' => [],
+                    'status' => 'removed'
+                ]);
+            }
+
+            return redirect()->back()
+                ->with('cart_open', true)
+                ->with('cart_updated', true);
+        }
+
+        session()->put('cart', $cart);
+
+        // ⭐ AJAX response
+        if (request()->expectsJson()) {
+            return response()->json([
+                'cart' => $cart,
+                'status' => 'removed'
+            ]);
         }
 
         return redirect()->back()
             ->with('cart_open', true)
             ->with('cart_updated', true);
     }
+
 }

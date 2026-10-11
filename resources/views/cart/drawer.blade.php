@@ -32,8 +32,11 @@
 
 
     <div class="flex-1 overflow-y-auto p-6 space-y-6">
-            <form action="{{ route('cart.update') }}" method="POST">
-                @csrf
+        <div x-data>
+
+
+
+        @csrf
 
                 <div
                     x-show="Object.keys(items).length === 0"
@@ -49,72 +52,120 @@
                             <div class="flex items-center gap-4 w-full">
                                 <img :src="item.image" class="w-16 h-16 rounded-lg object-cover">
 
+                                <!-- ⭐ Checkmark -->
+                                <div x-show="successItem === key" class=" text-green-600">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="3"
+                                         viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+
                                 <div class="flex flex-col">
                                     <span class="font-semibold text-neutral-900 text-lg" x-text="item.name"></span>
                                     <span class="text-neutral-600 text-sm">
-                                        $<span x-text="(item.price / 100).toFixed(2)"></span>
+                                    $<span
+                                            x-text="(item.price * item.qty / 100).toLocaleString('en-US', {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2
+                                            })"
+                                                                            ></span>
                                     </span>
+
                                 </div>
 
                                 <div class="flex items-center pr-4">
-                                    <form :action="'{{ url('/cart/remove') }}/' + key" method="POST">
-                                        @csrf
-                                        <button class="text-red-600 hover:text-red-800 mt-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                 class="w-4 h-4"
-                                                 fill="none"
-                                                 viewBox="0 0 24 24"
-                                                 stroke="currentColor"
-                                                 stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </form>
+                                    <button
+                                        type="button"
+                                        class="text-red-600 hover:text-red-800 mt-1"
+                                        @click="
+        fetch('{{ url('/cart/remove') }}/' + key, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',     // ⭐ REQUIRED
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            cartDrawerInstance.rehydrate(data.cart);
+            cartDrawerInstance.open = true;
+
+            // ⭐ Show banner
+            cartDrawerInstance.showUpdateBanner = true;
+
+            // ⭐ Auto-hide
+            setTimeout(() => {
+                cartDrawerInstance.showUpdateBanner = false;
+            }, 2000);
+        });
+    "
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                             class="w-4 h-4"
+                                             fill="none"
+                                             viewBox="0 0 24 24"
+                                             stroke="currentColor"
+                                             stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+
                                 </div>
                             </div>
 
                             <div class="flex items-center gap-2">
 
-                                <!-- ⭐ FIXED: decrement now calls decrement() -->
+                                <!-- Minus -->
                                 <button
                                     type="button"
                                     class="px-3 py-1 bg-neutral-200 rounded hover:bg-neutral-300"
-                                    @click="decrement(key)"
+                                    @click="updateQty(key, item.qty - 1)"
                                 >−</button>
 
+                                <!-- Quantity Input -->
                                 <input
                                     type="number"
-                                    :name="'qty[' + key + ']'"
                                     min="0"
                                     class="w-16 border rounded px-3 py-2 text-center"
                                     x-model="item.qty"
                                     @change="updateQty(key, item.qty)"
                                 >
 
-                                <!-- Plus button stays increment -->
+                                <!-- Plus -->
                                 <button
                                     type="button"
                                     class="px-3 py-1 bg-neutral-200 rounded hover:bg-neutral-300"
-                                    @click="increment(key)"
+                                    @click="updateQty(key, item.qty + 1)"
                                 >+</button>
 
+                                <!-- ⭐ Spinner -->
+                                <div x-show="loadingItem === key" class="ml-2">
+                                    <svg class="animate-spin h-5 w-5 text-neutral-500" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                stroke="currentColor" stroke-width="4" fill="none"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                              d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"></path>
+                                    </svg>
+                                </div>
+
+
+
                             </div>
+
 
                         </div>
                     </template>
                 </div>
 
-                <div class="mt-4 flex justify-end">
-                    <button
-                        type="submit"
-                        class="px-4 py-2 bg-neutral-900 text-white rounded-lg text-sm font-semibold hover:bg-neutral-700"
-                    >
-                        Update Cart
-                    </button>
-                </div>
+
             </form>
-        </div>
+
+
+
+    </div>
 
         <div class="p-6 border-t space-y-4">
             <div class="flex items-center justify-between text-lg font-semibold">
@@ -156,4 +207,5 @@
             </div>
         </div>
     </div>
+</div>
 </div>
