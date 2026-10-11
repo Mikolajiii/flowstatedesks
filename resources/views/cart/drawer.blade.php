@@ -144,15 +144,7 @@
                                     @click="updateQty(key, item.qty + 1)"
                                 >+</button>
 
-                                <!-- Optional spinner beside qty -->
-                                <div x-show="loadingItem === key" class="ml-2">
-                                    <svg class="slow-spin h-5 w-5 text-neutral-500" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                stroke="currentColor" stroke-width="4" fill="none"></circle>
-                                        <path class="opacity-75" fill="currentColor"
-                                              d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"></path>
-                                    </svg>
-                                </div>
+
 
                             </div>
 
@@ -197,8 +189,8 @@
             class="fixed inset-0 bg-black/50 z-[999] flex items-center justify-center"
         >
             <div class="bg-white p-6 rounded-xl shadow-xl text-center w-64">
+                <button>
                 <p class="text-lg font-semibold text-neutral-900 mb-4">Cart is Empty</p>
-                <button
                     class="px-4 py-2 bg-neutral-900 text-white rounded-lg"
                     @click="showEmptyPopup = false"
                 >
