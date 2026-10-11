@@ -7,89 +7,105 @@
 
     <!-- HERO SECTION -->
     <section
-        class=" relative w-full h-[80vh] bg-cover bg-center bg-no-repeat"
+        class="relative w-full h-[80vh] bg-cover bg-center bg-no-repeat"
         style="background-image: url('{{ Vite::asset('resources/images/other_photos/hero_section.webp') }}');"
     >
 
-        <!-- Dark overlay for readability -->
+        <!-- Dark overlay -->
         <div class="absolute inset-0 bg-black/25"></div>
 
-        <section >
-            <div class="max-w-6xl mx-auto">
+        <!-- NAV + LOGO -->
+        <section>
+            <div class="max-w-6xl mx-auto px-4">
 
-                <div class=" -mt-10 flex justify-center items-center text-xl font-semibold tracking-wide pt-6 relative z-20">
+                <div
+                    class="
+                flex flex-col md:flex-row
+                items-center md:items-center
+                justify-center md:justify-between
+                text-lg md:text-xl font-semibold tracking-wide
+                pt-6 gap-6 md:gap-20
+                relative z-20
+            "
+                >
 
-                    <!-- LEFT SIDE LINKS -->
-                    <div class="flex items-center gap-12">
-                        <a href="#FlowState_Pro"
-                           class="text-white transition-colors duration-200 hover:text-purple-500">
-                            Flow Pro
-                        </a>
-                        <a href="#FlowState_Mini"
-                           class="text-white transition-colors duration-200 hover:text-purple-500">
-                            Flow Mini
-                        </a>
-
-
+                    <!-- LEFT LINKS -->
+                    <div class="flex items-center gap-6 md:gap-12">
+                        <a href="#FlowState_Pro" class="text-white hover:text-purple-500 transition">Flow Pro</a>
+                        <a href="#FlowState_Mini" class="text-white hover:text-purple-500 transition">Flow Mini</a>
                     </div>
 
                     <!-- CENTER LOGO -->
-                    <div class="px-10">
-
+                    <div class="px-0 md:px-10">
                         <img
                             src="{{ Vite::asset('resources/images/other_photos/flowstate_logo.png') }}"
                             alt="FlowState Logo"
-                            class="w-52 md:w-72 drop-shadow-xl"
+                            class="w-40 md:w-52 lg:w-72 drop-shadow-xl"
                         />
                     </div>
 
-                    <!-- RIGHT SIDE LINKS -->
-                    <div class="flex items-center gap-12">
-                        <a href="#FlowState_SideCar"
-                           class="text-white transition-colors duration-200 hover:text-purple-500">
-                            Flow Side Car
-                        </a>
-
-
-                        <a href="#About"
-                           class="text-white transition-colors duration-200 hover:text-purple-500">
-                            About
-                        </a>
+                    <!-- RIGHT LINKS -->
+                    <div class="flex items-center gap-6 md:gap-12">
+                        <a href="#FlowState_SideCar" class="text-white hover:text-purple-500 transition">Flow Side Car</a>
+                        <a href="#About" class="text-white hover:text-purple-500 transition">About</a>
                     </div>
 
                 </div>
 
             </div>
         </section>
-        <!-- LOGO ABOVE TEXT -->
-
 
 
         <!-- HERO CONTENT -->
-        <div class="relative z-10 max-w-4xl px-8 flex flex-row justify-center items-center translate-x-32">
 
+        <!-- HERO CONTENT -->
+        <div
+            class="
+        relative z-10
+        max-w-6xl   /* ⭐ match the nav container width */
+        mx-auto
+        px-6 md:px-8
+        flex flex-col md:flex-row
+        items-start
+        justify-start
+    "
+        >
 
-            <!-- LEFT COLUMN (your content) -->
-            <div class="mt-4 w-1/2">
-                <h1 class="text-5xl md:text-6xl font-semibold leading-tight text-white drop-shadow-lg">
+            <!-- LEFT COLUMN (aligned with Flow Pro link) -->
+            <!-- LEFT COLUMN -->
+            <div class="
+    mt-6 md:mt-10
+    w-full md:w-1/2
+    text-center md:text-left   /* ⭐ center on small, left on desktop */
+">
+                <h1 class="text-4xl md:text-6xl font-semibold leading-tight text-white drop-shadow-lg">
                     A studio desk built<br>
                     for modern creators.
                 </h1>
 
-                <p class="text-neutral-200 max-w-xl mt-6 text-lg drop-shadow">
+                <p class="
+        text-neutral-200
+        max-w-xl
+        mt-4 md:mt-6
+        text-base md:text-lg
+        drop-shadow
+        mx-auto md:mx-0          /* ⭐ center paragraph on small, left on desktop */
+    ">
                     A clean, ergonomic workspace designed for producers, designers, and artists who demand clarity,
                     comfort, and room for inspiration.
                 </p>
             </div>
 
-            <!-- RIGHT COLUMN (empty on purpose) -->
-            <div class="w-1/2">
-                <!-- intentionally left empty -->
-            </div>
+
+            <!-- RIGHT COLUMN (empty on desktop) -->
+            <div class="hidden md:block w-1/2"></div>
 
         </div>
 
+
+
     </section>
+
 
 
 
