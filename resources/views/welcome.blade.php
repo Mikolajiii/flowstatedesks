@@ -693,7 +693,7 @@
 
     </section>
     <!-- testimonials section-->
-    <section>
+    {{--<section>
         <section id="testonials" class="w-full bg-white py-20  border-neutral-200">
             <div class="max-w-4xl mx-auto px-6 text-center">
 
@@ -708,7 +708,7 @@
             </div>
         </section>
     </section>
-
+--}}
     <!-- Modal: SideCar -->
 
     <div id="sidecar-modal"
