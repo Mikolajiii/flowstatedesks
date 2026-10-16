@@ -36,6 +36,8 @@ class CheckoutController extends Controller
         }
 
         // Create checkout session
+        $firstItem = $cart[array_key_first($cart)];
+
         $session = \Stripe\Checkout\Session::create([
             'mode' => 'payment',
             'customer_creation' => 'always',
@@ -44,9 +46,18 @@ class CheckoutController extends Controller
                 'allowed_countries' => ['CA'],
             ],
             'line_items' => $lineItems,
+
+            'metadata' => [
+                'product'     => $firstItem['name'] ?? 'Unknown',
+                'description' => $firstItem['description'] ?? null,
+                'price_id'    => $firstItem['price_id'] ?? null,
+            ],
+
             'success_url' => route('payment.success'),
             'cancel_url'  => route('payment.cancel'),
         ]);
+
+
 
         return redirect($session->url);
     }

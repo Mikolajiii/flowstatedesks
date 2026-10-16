@@ -11,9 +11,8 @@ class StripeDashboardController extends Controller
     {
         $orders = DB::table('webhook_calls')
             ->where(function ($q) {
-                $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(payload, '$.type')) = 'checkout.session.completed'")
-                    ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(payload, '$.type')) = 'payment_intent.succeeded'")
-                    ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(payload, '$.type')) = 'charge.succeeded'");
+                $q->whereRaw("JSON_EXTRACT(payload, '$.type') LIKE '%checkout.session.completed%'");
+
             })
             ->orderBy('id', 'desc')
             ->paginate(25);
@@ -45,6 +44,21 @@ class StripeDashboardController extends Controller
             if (!$order->buyer_name && !empty($obj['shipping']['name'])) {
                 $order->buyer_name = $obj['shipping']['name'];
             }
+            \Log::info('TYPE DEBUG', [
+                'raw_type' => $payload['type'] ?? null,
+            ]);
+
+            \Log::info('METADATA DEBUG', [
+                'id'       => $order->id,
+                'metadata' => $obj['metadata'] ?? null,
+            ]);
+
+            \Log::info('PRODUCT FIELD', [
+                'id'      => $order->id,
+                'product' => $obj['metadata']['product'] ?? null,
+            ]);
+
+
         }
 
         return view('admin.stripe.orders.index', compact('orders'));

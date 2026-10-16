@@ -6,12 +6,14 @@ use App\Services\SendGridService;
 $sendgrid = app(SendGridService::class);
 
 $success = $sendgrid->sendTemplate(
-    'PAYMENT_SUCCESS',
+    'WELCOME_MESSAGE',
     "mikolajkondakow@gmail.com",
     "Flow State Customer",
     [
         'message' => "Payment completed. Let me know if you got this email",
-        'bcc'     => "michaelkondakow@gmail.com",
+        'order_id' => 12345,
+        'total' => 123.45,
+
     ]
 );
 

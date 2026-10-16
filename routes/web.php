@@ -3,8 +3,9 @@
 
 use App\Http\Controllers\Admin\StripeDashboardController;
 use App\Http\Controllers\CartController;
+use Spatie\WebhookClient\Http\Controllers\WebhookController;
 use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\StripeWebhookController;
+//use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 use App\Services\SendGridService;
 Route::get('/', function () {
@@ -73,8 +74,24 @@ Route::post('/cart/remove/{product}', [CartController::class, 'remove'])->name('
 Route::get('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
 
 
-Route::stripeWebhooks('stripe/webhook')
+/*Route::stripeWebhooks('stripe/webhook')
     ->withoutMiddleware(['web', 'csrf']);
+
+*/
+
+
+Route::stripeWebhooks('stripe/webhook');
+
+
+//Route::webhooks('stripe/webhook', 'stripe')
+//    ->withoutMiddleware(['web', 'csrf']);
+
+
+
+
+
+
+
 
 
 
@@ -100,3 +117,7 @@ Route::prefix('admin/stripe')->group(function () {
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::get('/cart', [CartController::class, 'view'])->name('cart.view');
 Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
+
+
+//test sendgrid
+Route::get('/sendgrid-test', [\App\Http\Controllers\SendGridTestController::class, 'test']);

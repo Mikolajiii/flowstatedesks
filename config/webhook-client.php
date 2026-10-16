@@ -8,8 +8,9 @@ return [
             'signing_secret' => env('STRIPE_WEBHOOK_SECRET'),
 
             'signature_header_name' => 'Stripe-Signature',
-
             'signature_validator' => \Spatie\WebhookClient\SignatureValidator\DefaultSignatureValidator::class,
+
+            //'signature_validator' => \Spatie\WebhookClient\SignatureValidator\DefaultSignatureValidator::class,
 
             'webhook_profile' => \Spatie\WebhookClient\WebhookProfile\ProcessEverythingWebhookProfile::class,
 
