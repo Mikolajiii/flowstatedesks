@@ -72,6 +72,8 @@ Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
 Route::post('/cart/remove/{product}', [CartController::class, 'remove'])->name('cart.remove');
 Route::get('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
+Route::get('/admin/stripe/transactions/sync', [StripeDashboardController::class, 'sync'])
+    ->name('admin.stripe.transactions.sync');
 
 
 /*Route::stripeWebhooks('stripe/webhook')

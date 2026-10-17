@@ -57,6 +57,7 @@ class ProcessStripeWebhook extends ProcessWebhookJob
         ]);
 
         // Handle events
+        // Handle events
         switch ($eventType) {
 
             case 'payment_intent.succeeded':
@@ -78,7 +79,6 @@ class ProcessStripeWebhook extends ProcessWebhookJob
                 $customerEmail = $customerDetails['email'] ?? null;
                 $customerName  = $customerDetails['name'] ?? 'Flow State Customer';
 
-
                 \Log::info("📧 Sending customer email...", [
                     'order_id' => $orderId,
                     'total' => $total,
@@ -88,9 +88,9 @@ class ProcessStripeWebhook extends ProcessWebhookJob
 
                 // ⭐ SendGrid dynamic template email
                 $result = app(SendGridService::class)->sendTemplate(
-                    'WELCOME_MESSAGE',          // your template key
-                    'mikadoneng@gmail.com',     // your email
-                    'Mickey',                   // name
+                    'WELCOME_MESSAGE',
+                    'mikadoneng@gmail.com',
+                    'Mickey',
                     [
                         'message' => "You have a new order!",
                         'order_id' => $orderId,
@@ -100,18 +100,57 @@ class ProcessStripeWebhook extends ProcessWebhookJob
 
                 \Log::info("📨 SendGrid result", [
                     'success' => $result,
-                 
                 ]);
+
                 \Log::info("🟢 CHECKOUT BLOCK REACHED");
 
                 break;
 
+            /**
+             * ⭐ NEW: Payout created → money is pending
+             */
+            case 'payout.created':
+                \Log::info("💰 payout.created — funds pending");
 
+                $webhook->update([
+                    'payout_status' => 'pending',
+                    'payout_at'     => null,
+                ]);
+
+                break;
+
+            /**
+             * ⭐ NEW: Payout paid → money is in your bank
+             */
+            case 'payout.paid':
+                \Log::info("🏦 payout.paid — funds deposited to bank");
+
+                $arrival = $object['arrival_date'] ?? null;
+
+                $webhook->update([
+                    'payout_status' => 'paid',
+                    'payout_at'     => $arrival ? \Carbon\Carbon::createFromTimestamp($arrival) : now(),
+                ]);
+
+                break;
+
+            /**
+             * ⭐ NEW: Payout failed
+             */
+            case 'payout.failed':
+                \Log::warning("❌ payout.failed — payout failed");
+
+                $webhook->update([
+                    'payout_status' => 'failed',
+                    'payout_at'     => null,
+                ]);
+
+                break;
 
             default:
                 \Log::warning("⚠️ Unhandled Stripe event type", [
                     'event_type' => $eventType,
                 ]);
         }
-    }
 }
+    }

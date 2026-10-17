@@ -21,6 +21,7 @@ class CheckoutController extends Controller
 
         // Build Stripe line items
         $lineItems = [];
+        $cartItems = [];   // 👈 snapshot for metadata
 
         foreach ($cart as $key => $item) {
             $lineItems[] = [
@@ -33,12 +34,20 @@ class CheckoutController extends Controller
                 ],
                 'quantity' => $item['qty'],
             ];
+
+            // 👇 capture cart item details for later
+            $cartItems[] = [
+                'key'   => $key,
+                'name'  => $item['name'],
+                'qty'   => $item['qty'],
+                'price' => $item['price'], // cents
+            ];
         }
 
-        // Create checkout session
+        // First item (for legacy fields)
         $firstItem = $cart[array_key_first($cart)];
 
-        $session = \Stripe\Checkout\Session::create([
+        $session = Session::create([
             'mode' => 'payment',
             'customer_creation' => 'always',
             'billing_address_collection' => 'required',
@@ -47,20 +56,18 @@ class CheckoutController extends Controller
             ],
             'line_items' => $lineItems,
 
+            // ⭐ Full cart snapshot in metadata
             'metadata' => [
-                'product'     => $firstItem['name'] ?? 'Unknown',
-                'description' => $firstItem['description'] ?? null,
-                'price_id'    => $firstItem['price_id'] ?? null,
+                'items'      => json_encode($cartItems),          // 👈 all items
+                'product'    => $firstItem['name'] ?? 'Unknown', // legacy single product
+                'description'=> $firstItem['description'] ?? null,
+                'price_id'   => $firstItem['price_id'] ?? null,
             ],
 
             'success_url' => route('payment.success'),
             'cancel_url'  => route('payment.cancel'),
         ]);
 
-
-
         return redirect($session->url);
     }
-
-
 }

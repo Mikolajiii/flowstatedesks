@@ -14,14 +14,17 @@ class SendGridTestController extends Controller
         $sendgrid = app(SendGridService::class);
 
         $success = $sendgrid->sendTemplate(
-            'WELCOME_MESSAGE',          // your template key
-            'mikolajkondakow@gmail.com',     // your email
-            'Mickey',                   // name
+            'WELCOME_MESSAGE',
+            'mikadoneng@gmail.com',   // main recipient
+            'Mickey',
             [
-                'message' => "Payment completed. Let me know if you got this email",
+                'message'  => "Payment completed. Let me know if you got this email",
+                'order_id' => 12345,
+                'total'    => 123.45,
+            ],
 
-            ]
         );
+
 
         Log::info('📨 SendGrid TEST: result', [
             'success' => $success,
