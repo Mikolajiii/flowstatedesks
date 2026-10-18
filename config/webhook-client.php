@@ -25,7 +25,7 @@ return [
             'process_webhook_job' => \App\Jobs\ProcessStripeWebhook::class,
 
            //make true for live server
-            'verify_signature' => true,
+            'verify_signature' => false,
 
 
         ],
