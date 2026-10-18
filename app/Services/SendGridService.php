@@ -17,7 +17,7 @@ class SendGridService
 
         // Disable SSL verification ONLY in local environment
         if (app()->environment('local')) {
-            $options['verify_ssl'] = false;
+            $options['verify_ssl'] = true;
         }
 
         $this->sendgrid = new \SendGrid(env('SENDGRID_API_KEY'), $options);
