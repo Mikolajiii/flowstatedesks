@@ -59,19 +59,13 @@ Route::get('/test-email', function () {
 
 //shopping cart routes
 
-/* route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
-Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
-Route::post('/cart/remove/{key}', [CartController::class, 'remove'])->name('cart.remove');
-Route::post('/cart/clear', function () {
-    session()->forget('cart');
-    return response()->json(['status' => 'cleared']);
-});
 
-*/
+
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
 Route::post('/cart/remove/{product}', [CartController::class, 'remove'])->name('cart.remove');
 Route::get('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
+
 Route::get('/admin/stripe/transactions/sync', [StripeDashboardController::class, 'sync'])
     ->name('admin.stripe.transactions.sync');
 
@@ -118,7 +112,7 @@ Route::prefix('admin/stripe')->group(function () {
 //cart routes
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::get('/cart', [CartController::class, 'view'])->name('cart.view');
-Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
+
 
 
 //test sendgrid
