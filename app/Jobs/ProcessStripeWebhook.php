@@ -89,8 +89,8 @@ class ProcessStripeWebhook extends ProcessWebhookJob
                 // ⭐ SendGrid dynamic template email
                 $result = app(SendGridService::class)->sendTemplate(
                     'WELCOME_MESSAGE',
-                    'mikadoneng@gmail.com',
-                    'Mickey',
+                    'michaelkondakow@gmail.com',
+                    'Michael',
                     [
                         'message' => "You have a new order!",
                         'order_id' => $orderId,

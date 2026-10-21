@@ -83,20 +83,7 @@ Route::stripeWebhooks('stripe/webhook');
 //    ->withoutMiddleware(['web', 'csrf']);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 //stripe  admin routes
-
 Route::get('/admin/stripe', function () {
     return view('admin.stripe.dashboard');
 })->name('admin.stripe.dashboard');
