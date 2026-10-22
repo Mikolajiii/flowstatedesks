@@ -6,6 +6,14 @@
     <!-- ⭐ MUST BE HERE -->
 
     <!-- HERO SECTION -->
+    <section
+        class="
+        hero-bg
+        relative w-full min-h-screen
+        bg-cover bg-center bg-no-repeat
+        overflow-hidden
+    "
+    >
 
 
 

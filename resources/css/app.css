@@ -7,6 +7,11 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+.hero-bg {
+    background-image: url('../images/other_photos/hero_section.webp');
+}
+
 [x-cloak] {
     opacity: 0 !important;
     transform: translateX(100%) !important;
