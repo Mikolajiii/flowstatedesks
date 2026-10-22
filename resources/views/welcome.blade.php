@@ -12,7 +12,8 @@
         bg-cover bg-center bg-no-repeat
         overflow-hidden
     "
-        style="background-image: url('{{ Vite::asset('resources/images/other_photos/hero_section.webp') }}');"
+        style="background-image: url('{{ asset('images/other_photos/hero_section.webp') }}');"
+
     >
 
 
@@ -43,7 +44,7 @@
                     <!-- CENTER LOGO -->
                     <div class="px-0 md:px-10">
                         <img
-                            src="{{ Vite::asset('resources/images/other_photos/flowstate_logo.png') }}"
+                            src="{{ asset('images/other_photos/flowstate_logo.png') }}"
                             alt="FlowState Logo"
                             class="w-40 md:w-52 lg:w-72 drop-shadow-xl"
                         />
@@ -144,7 +145,7 @@
 
                         <img
                             alt="FlowState Pro"
-                            src="{{ Vite::asset('resources/images/Product_photos/flowstate_pro/1_FLOWPRO_EDITED.webp') }}"
+                            src="{{ asset('images/Product_photos/flowstate_pro/1_FLOWPRO_EDITED.webp') }}"
                             class="w-full h-full object-cover"
                             id="pro-main-image"
                         />
@@ -169,15 +170,16 @@
 
                     <!-- Thumbnails -->
                     <div class="grid grid-cols-8 gap-3">
-                        <img alt="FlowState Pro" src="{{ Vite::asset('resources/images/Product_photos/flowstate_pro/1_FLOWPRO_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="FlowState Pro" src="{{ Vite::asset('resources/images/Product_photos/flowstate_pro/2_FLOWPRO_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="FlowState Pro" src="{{ Vite::asset('resources/images/Product_photos/flowstate_pro/3_FLOWPRO_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="FlowState Pro" src="{{ Vite::asset('resources/images/Product_photos/flowstate_pro/4_FLOWPRO_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="FlowState Pro" src="{{ Vite::asset('resources/images/Product_photos/flowstate_pro/5_FLOWPRO_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="FlowState Pro" src="{{ Vite::asset('resources/images/Product_photos/flowstate_pro/6_FLOWPRO_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="FlowState Pro" src="{{ Vite::asset('resources/images/Product_photos/flowstate_pro/7_FLOWPRO_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="FlowState Pro" src="{{ Vite::asset('resources/images/Product_photos/flowstate_pro/8_FLOWPRO_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="FlowState Pro" src="{{ asset('images/Product_photos/flowstate_pro/1_FLOWPRO_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="FlowState Pro" src="{{ asset('images/Product_photos/flowstate_pro/2_FLOWPRO_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="FlowState Pro" src="{{ asset('images/Product_photos/flowstate_pro/3_FLOWPRO_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="FlowState Pro" src="{{ asset('images/Product_photos/flowstate_pro/4_FLOWPRO_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="FlowState Pro" src="{{ asset('images/Product_photos/flowstate_pro/5_FLOWPRO_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="FlowState Pro" src="{{ asset('images/Product_photos/flowstate_pro/6_FLOWPRO_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="FlowState Pro" src="{{ asset('images/Product_photos/flowstate_pro/7_FLOWPRO_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="FlowState Pro" src="{{ asset('images/Product_photos/flowstate_pro/8_FLOWPRO_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
                     </div>
+
 
 
                 </div>
@@ -326,7 +328,7 @@
 
                         <img
                             alt="FlowState Mini"
-                            src="{{ Vite::asset('resources/images/Product_photos/flowstate_mini/1_FLOWMINI_EDITED.webp') }}"
+                            src="{{ asset('images/Product_photos/flowstate_mini/1_FLOWMINI_EDITED.webp') }}"
                             class="w-full h-full object-cover"
                             id="mini-main-image"
                         />
@@ -348,15 +350,16 @@
 
                     <!-- Thumbnails -->
                     <div class="grid grid-cols-8 gap-3">
-                        <img alt="FlowState Mini" src="{{ Vite::asset('resources/images/Product_photos/flowstate_mini/1_FLOWMINI_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="FlowState Mini" src="{{ Vite::asset('resources/images/Product_photos/flowstate_mini/2_FLOWMINI_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="FlowState Mini" src="{{ Vite::asset('resources/images/Product_photos/flowstate_mini/3_FLOWMINI_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="FlowState Mini" src="{{ Vite::asset('resources/images/Product_photos/flowstate_mini/4_FLOWMINI_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="FlowState Mini" src="{{ Vite::asset('resources/images/Product_photos/flowstate_mini/5_FLOWMINI_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="FlowState Mini" src="{{ Vite::asset('resources/images/Product_photos/flowstate_mini/6_FLOWMINI_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="FlowState Mini" src="{{ Vite::asset('resources/images/Product_photos/flowstate_mini/7_FLOWMINI_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="FlowState Mini" src="{{ Vite::asset('resources/images/Product_photos/flowstate_mini/8_FLOWMINI_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="FlowState Mini" src="{{ asset('images/Product_photos/flowstate_mini/1_FLOWMINI_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="FlowState Mini" src="{{ asset('images/Product_photos/flowstate_mini/2_FLOWMINI_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="FlowState Mini" src="{{ asset('images/Product_photos/flowstate_mini/3_FLOWMINI_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="FlowState Mini" src="{{ asset('images/Product_photos/flowstate_mini/4_FLOWMINI_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="FlowState Mini" src="{{ asset('images/Product_photos/flowstate_mini/5_FLOWMINI_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="FlowState Mini" src="{{ asset('images/Product_photos/flowstate_mini/6_FLOWMINI_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="FlowState Mini" src="{{ asset('images/Product_photos/flowstate_mini/7_FLOWMINI_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="FlowState Mini" src="{{ asset('images/Product_photos/flowstate_mini/8_FLOWMINI_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
                     </div>
+
 
 
                 </div>
@@ -503,7 +506,7 @@
                     <div class="rounded-3xl overflow-hidden h-[500px] relative">
                         <img
                             alt="side car"
-                            src="{{ Vite::asset('resources/images/Product_photos/flowstate_sidecar/1_RACK_EDITED.webp') }}"
+                            src="{{  asset('images/Product_photos/flowstate_sidecar/1_RACK_EDITED.webp') }}"
                             class="w-full h-full object-cover"
                             id="sidecar-main-image"
                         />
@@ -525,17 +528,18 @@
 
                     <!-- Thumbnails -->
                     <div class="grid grid-cols-8 gap-3">
-                        <img alt="sidecar" src="{{ Vite::asset('resources/images/Product_photos/flowstate_sidecar/1_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="sidecar" src="{{ Vite::asset('resources/images/Product_photos/flowstate_sidecar/2_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="sidecar" src="{{ Vite::asset('resources/images/Product_photos/flowstate_sidecar/3_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="sidecar" src="{{ Vite::asset('resources/images/Product_photos/flowstate_sidecar/4_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="sidecar" src="{{ Vite::asset('resources/images/Product_photos/flowstate_sidecar/5_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="sidecar" src="{{ Vite::asset('resources/images/Product_photos/flowstate_sidecar/6_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="sidecar" src="{{ Vite::asset('resources/images/Product_photos/flowstate_sidecar/7_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="sidecar" src="{{ Vite::asset('resources/images/Product_photos/flowstate_sidecar/8_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="sidecar" src="{{ Vite::asset('resources/images/Product_photos/flowstate_sidecar/9_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
-                        <img alt="sidecar" src="{{ Vite::asset('resources/images/Product_photos/flowstate_sidecar/10_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="sidecar" src="{{ asset('images/Product_photos/flowstate_sidecar/1_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="sidecar" src="{{ asset('images/Product_photos/flowstate_sidecar/2_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="sidecar" src="{{ asset('images/Product_photos/flowstate_sidecar/3_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="sidecar" src="{{ asset('images/Product_photos/flowstate_sidecar/4_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="sidecar" src="{{ asset('images/Product_photos/flowstate_sidecar/5_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="sidecar" src="{{ asset('images/Product_photos/flowstate_sidecar/6_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="sidecar" src="{{ asset('images/Product_photos/flowstate_sidecar/7_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="sidecar" src="{{ asset('images/Product_photos/flowstate_sidecar/8_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="sidecar" src="{{ asset('images/Product_photos/flowstate_sidecar/9_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
+                        <img alt="sidecar" src="{{ asset('images/Product_photos/flowstate_sidecar/10_RACK_EDITED.webp') }}" class="thumb rounded-xl object-cover h-20">
                     </div>
+
 
 
 
