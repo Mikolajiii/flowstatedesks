@@ -8,13 +8,12 @@
     <!-- HERO SECTION -->
     <section
         class="
-        hero-bg
         relative w-full min-h-screen
         bg-cover bg-center bg-no-repeat
         overflow-hidden
     "
+        style="background-image: url('{{ Vite::asset('resources/images/other_photos/hero_section.webp') }}');"
     >
-
 
 
     <!-- Dark overlay -->

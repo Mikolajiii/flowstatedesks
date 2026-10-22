@@ -12,6 +12,7 @@
     background-image: url('../images/other_photos/hero_section.webp');
 }
 
+
 [x-cloak] {
     opacity: 0 !important;
     transform: translateX(100%) !important;
