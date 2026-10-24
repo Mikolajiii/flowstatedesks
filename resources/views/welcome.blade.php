@@ -18,31 +18,29 @@
 
 
     <!-- Dark overlay -->
-        <div class="absolute inset-0 bg-black/25"></div>
+
 
         <!-- NAV + LOGO -->
-        <section>
-            <div class="max-w-6xl mx-auto px-4">
+        <!-- HERO SECTION -->
+        <section
+            class="
+        relative w-full min-h-screen
+        bg-cover bg-center bg-no-repeat
+        overflow-hidden
+    "
+            style="background-image: url('{{ asset('images/other_photos/hero_section.webp') }}');"
+        >
 
-                <div
-                    class="
-                flex flex-col md:flex-row
-                items-center md:items-center
-                justify-center md:justify-between
-                text-lg md:text-xl font-semibold tracking-wide
-                pt-6 gap-6 md:gap-20
-                relative z-20
-            "
-                >
+            <!-- Dark overlay -->
+            <div class="absolute inset-0 bg-white/10"></div>
 
-                    <!-- LEFT LINKS -->
-                    <div class="flex items-center gap-6 md:gap-12">
-                        <a href="#FlowState_Pro" class="text-white hover:text-purple-500 transition">Flow Pro</a>
-                        <a href="#FlowState_Mini" class="text-white hover:text-purple-500 transition">Flow Mini</a>
-                    </div>
+            <!-- NAVIGATION -->
+            <div class="relative z-20 max-w-7xl mx-auto px-4 pt-6">
 
-                    <!-- CENTER LOGO -->
-                    <div class="px-0 md:px-10">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-center">
+
+                    <!-- LOGO -->
+                    <div class="flex justify-center lg:order-2 md:col-span-2 lg:col-span-1">
                         <img
                             src="{{ asset('images/other_photos/flowstate_logo.png') }}"
                             alt="FlowState Logo"
@@ -50,82 +48,143 @@
                         />
                     </div>
 
-                    <!-- RIGHT LINKS -->
-                    <div class="flex items-center gap-6 md:gap-12">
-                        <a href="#FlowState_SideCar" class="text-white hover:text-purple-500 transition">Flow Side Car</a>
-                        <a href="#About" class="text-white hover:text-purple-500 transition">About</a>
-                    </div>
-                    <button
-                        @click="open = true"
-                        class="relative flex items-center gap-2  text-white hover:text-purple-500"
+                    <!-- LEFT LINKS -->
+                    <div
+                        class="
+                    flex flex-col sm:flex-row
+                    justify-center
+                    items-center
+                    gap-4 md:gap-8 lg:gap-12
+                    text-lg md:text-xl
+                    font-semibold
+                    tracking-wide
+                    lg:order-1
+                "
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                             class="w-6 h-6"
-                             fill="none"
-                             viewBox="0 0 24 24"
-                             stroke="currentColor"
-                             stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M3 3h2l3 12h10l3-8H6" />
-                        </svg>
+                        <a href="#FlowState_Pro"
+                           class="text-white hover:text-purple-500 transition">
+                            Flow Pro
+                        </a>
 
-                        <span>Cart</span>
+                        <a href="#FlowState_Mini"
+                           class="text-white hover:text-purple-500 transition">
+                            Flow Mini
+                        </a>
+                    </div>
 
-                        <span
-                            x-show="badgeCount > 0"
-                            x-text="badgeCount"
-                            class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5"
-                        ></span>
-                    </button>
+                    <!-- RIGHT LINKS -->
+                    <div
+                        class="
+                    flex flex-col sm:flex-row
+                    justify-center
+                    items-center
+                    gap-4 md:gap-8 lg:gap-12
+                    text-lg md:text-xl
+                    font-semibold
+                    tracking-wide
+                    lg:order-3
+                "
+                    >
+                        <a href="#FlowState_SideCar"
+                           class="text-white hover:text-purple-500 transition">
+                            Flow Side Car
+                        </a>
+
+                        <a href="#About"
+                           class="text-white hover:text-purple-500 transition">
+                            About
+                        </a>
+
+                        <button
+                            @click="open = true"
+                            class="relative flex items-center gap-2 text-white hover:text-purple-500 transition"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 class="w-6 h-6"
+                                 fill="none"
+                                 viewBox="0 0 24 24"
+                                 stroke="currentColor"
+                                 stroke-width="2">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M3 3h2l3 12h10l3-8H6"
+                                />
+                            </svg>
+
+                            <span>Cart</span>
+
+                            <span
+                                x-show="badgeCount > 0"
+                                x-text="badgeCount"
+                                class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5"
+                            ></span>
+                        </button>
+                    </div>
 
                 </div>
 
             </div>
-        </section>
 
+            <!-- HERO CONTENT -->
+            <div
+                class="
+            relative z-10
+            max-w-7xl
+            mx-auto
 
-        <!-- HERO CONTENT -->
+            flex flex-col
+            md:grid md:grid-cols-2
+            lg:flex lg:flex-row
 
+            items-center
+            lg:items-start
 
-        <div
-            class="
-        relative z-10
-        w-full            /* ⭐ full width, no container */
-         pl-0 md:pl-100            /* ⭐ remove horizontal padding */
-        flex flex-col md:flex-row
-        items-start
-        justify-start
-        mt-20
-    "
-        >
+            px-6
+            md:px-12
+            lg:px-4
 
-            <!-- LEFT COLUMN (extreme left) -->
-            <div class="mt-6 md:mt-10 w-full md:w-1/2 text-left pl-4 md:pl-0">
-                <h1 class="text-4xl md:text-7xl font-semibold leading-tight text-white drop-shadow-lg">
-                    A studio desk built<br>
-                    for modern creators.
-                </h1>
+            mt-16
+            md:mt-24
+            lg:mt-32
+        "
+            >
 
-                <p class="text-neutral-200  max-w-xl mt-4 md:mt-6 text-base md:text-2xl drop-shadow">
-                    A clean, ergonomic workspace designed for producers, designers, and artists who demand clarity,
-                    comfort, and room for inspiration.
-                </p>
+                <!-- LEFT COLUMN -->
+                <div
+                    class="
+                w-full
+                text-center
+                md:text-left
+            "
+                >
+                    <h1
+                        class="
+    text-2xl
+    sm:text-3xl
+    md:text-4xl
+    lg:text-5xl
+    xl:text-5xl
+    2xl:text-6xl
+
+    font-semibold
+    leading-tight
+    text-white
+    drop-shadow-lg
+"
+                    >
+                        A studio desk built<br>
+                        for              designers, and artists who demand clarity, comfort,
+                        and room for inspiration.
+                        </h1>
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div class="hidden md:block"></div>
+
             </div>
 
-            <!-- RIGHT COLUMN (empty on desktop) -->
-            <div class="hidden md:block w-1/2"></div>
-
-        </div>
-
-
-        <!-- RIGHT COLUMN (empty on desktop) -->
-            <div class="hidden md:block w-1/2"></div>
-
-
-
-
-
-    </section>
+        </section>
 
 
 
@@ -138,7 +197,7 @@
             <div class="flex flex-col lg:flex-row gap-12 items-start">
 
                 <!-- Product image + gallery -->
-                <div class=" mt-20 flex-1 space-y-4">
+                <div class="flex-1 space-y-4">
 
                     <!-- Main Image -->
                     <div class="rounded-3xl overflow-hidden h-[500px] relative">
@@ -490,7 +549,7 @@
 
             </div> <!-- closes .flex flex-col lg:flex-row -->
 
-        </div> <!-- closes .w-full px-6 py-16 -->
+      <!-- closes .w-full px-6 py-16 -->
     </section>
     <!-- Product: FlowState Sidecar -->
     <section id="FlowState_SideCar" class="bg-white">
@@ -661,7 +720,9 @@
                             </div>
 
 
-                    </div> <!-- closes .flex-1 space-y-6 -->
+                    </div>
+
+                    <!-- closes .flex-1 space-y-6 -->
 
                     </div> <!-- closes .flex flex-col lg:flex-row -->
 
