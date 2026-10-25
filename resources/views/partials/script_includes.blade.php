@@ -31,10 +31,10 @@
 <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script src="https://cdn.tiny.cloud/1/g00avskjgc24mvqth0k6w6lux3oj3at53kb0cdsqt72uqa87/tinymce/8/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
+<!--<script src="https://cdn.tiny.cloud/1/g00avskjgc24mvqth0k6w6lux3oj3at53kb0cdsqt72uqa87/tinymce/8/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>-->
 
 
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>-->
 
 
 
