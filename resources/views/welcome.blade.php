@@ -317,7 +317,7 @@
     "
                                     >
 
-                                    <label class="block mb-2 text-sm text-neutral-700">Quantity</label>
+                                    <label class="block mb-3 text-sm text-neutral-900">Quantity</label>
 
                                         <input
                                             type="number"
@@ -337,7 +337,7 @@
 
                                     <button
                                         @click="$dispatch('open-cart')"
-                                        class="flex items-center gap-2 text-neutral-900 hover:text-neutral-700"
+                                        class="flex items-center mt-1 gap-2 text-neutral-900 hover:text-neutral-700"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg"
                                              class="w-6 h-6"
@@ -513,7 +513,7 @@
 
                                     <button
                                         @click="$dispatch('open-cart')"
-                                        class="flex items-center gap-2 text-neutral-900 hover:text-neutral-700"
+                                        class="flex items-center mt-1 gap-2 text-neutral-900 hover:text-neutral-700"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg"
                                              class="w-6 h-6"
@@ -698,7 +698,7 @@
 
                                     <button
                                         @click="$dispatch('open-cart')"
-                                        class="flex items-center gap-2 text-neutral-900 hover:text-neutral-700"
+                                        class="flex items-center mt-1 gap-2 text-neutral-900 hover:text-neutral-700"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg"
                                              class="w-6 h-6"

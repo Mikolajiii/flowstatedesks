@@ -83,6 +83,45 @@ Route::stripeWebhooks('stripe/webhook');
 //    ->withoutMiddleware(['web', 'csrf']);
 
 
+
+Route::get('/admin/logout', function () {
+
+    session()->flush();
+
+    return redirect('/admin/login');
+
+})->name('admin.logout');
+
+
+
+Route::get('/admin/login', function () {
+
+    return view('admin.login');
+
+})->name('admin.login');
+
+Route::post('/admin/login', function (\Illuminate\Http\Request $request) {
+
+    if ($request->password === env('ADMIN_PASSWORD')) {
+
+        session([
+            'admin_authenticated' => true
+        ]);
+
+        return redirect()->route('admin.stripe.dashboard');
+    }
+
+    return back()->withErrors([
+        'password' => 'Invalid password'
+    ]);
+
+})->name('admin.login.submit');
+
+
+
+
+
+Route::middleware('admin.password')->group(function () {
 //stripe  admin routes
 Route::get('/admin/stripe', function () {
     return view('admin.stripe.dashboard');
@@ -95,7 +134,7 @@ Route::prefix('admin/stripe')->group(function () {
     Route::get('/transactions', [StripeDashboardController::class, 'transactions'])->name('admin.stripe.transactions');
     Route::get('/transactions/{id}', [StripeDashboardController::class, 'transactionShow'])->name('admin.stripe.transactions.show');
 });
-
+});
 //cart routes
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::get('/cart', [CartController::class, 'view'])->name('cart.view');
