@@ -3,9 +3,9 @@
 namespace App\Jobs;
 
 use App\Services\SendGridService;
-//use Spatie\WebhookClient\Jobs\ProcessWebhookJob;
-use Spatie\StripeWebhooks\ProcessStripeWebhookJob;
-class ProcessStripeWebhook extends ProcessStripeWebhookJob
+use Spatie\WebhookClient\Jobs\ProcessWebhookJob;
+
+class ProcessStripeWebhook extends ProcessWebhookJob
 {
     public function handle()
     {

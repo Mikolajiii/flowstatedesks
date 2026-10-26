@@ -165,17 +165,17 @@
     md:text-4xl
     lg:text-5xl
     xl:text-5xl
-    2xl:text-6xl
+    2xl:text-7xl
 
     font-semibold
     leading-tight
     text-white
     drop-shadow-lg
+    text-center
 "
                     >
-                        A studio desk built<br>
-                        for              designers, and artists who demand clarity, comfort,
-                        and room for inspiration.
+                       Studio furniture built<br>
+                        by Creators for Creators
                         </h1>
                 </div>
 
