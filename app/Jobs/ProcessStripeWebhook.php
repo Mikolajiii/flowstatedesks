@@ -3,9 +3,9 @@
 namespace App\Jobs;
 
 use App\Services\SendGridService;
-use Spatie\WebhookClient\Jobs\ProcessWebhookJob;
-
-class ProcessStripeWebhook extends ProcessWebhookJob
+//use Spatie\WebhookClient\Jobs\ProcessWebhookJob;
+use Spatie\StripeWebhooks\ProcessStripeWebhookJob;
+class ProcessStripeWebhook extends ProcessStripeWebhookJob
 {
     public function handle()
     {
@@ -143,6 +143,22 @@ class ProcessStripeWebhook extends ProcessWebhookJob
                 $webhook->update([
                     'payout_status' => 'failed',
                     'payout_at'     => null,
+                ]);
+
+                break;
+            case 'charge.succeeded':
+
+                \Log::info("💳 charge.succeeded fired");
+
+                $charge = $object;
+
+                \Log::info("💳 Charge Details", [
+                    'charge_id'        => $charge['id'] ?? null,
+                    'amount'           => $charge['amount'] ?? null,
+                    'currency'         => $charge['currency'] ?? null,
+                    'customer'         => $charge['customer'] ?? null,
+                    'payment_intent'   => $charge['payment_intent'] ?? null,
+                    'status'           => $charge['status'] ?? null,
                 ]);
 
                 break;
