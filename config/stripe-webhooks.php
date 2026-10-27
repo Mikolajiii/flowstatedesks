@@ -23,6 +23,9 @@ return [
      */
     'jobs' => [
 
+        'payment_intent_created' =>
+            \App\Jobs\ProcessStripeWebhook::class,
+
         'charge_succeeded' =>
             \App\Jobs\ProcessStripeWebhook::class,
 
