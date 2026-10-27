@@ -22,8 +22,16 @@ return [
      * https://stripe.com/docs/api#event_types.
      */
     'jobs' => [
-        // 'source_chargeable' => \App\Jobs\StripeWebhooks\HandleChargeableSource::class,
-        // 'charge_failed' => \App\Jobs\StripeWebhooks\HandleFailedCharge::class,
+
+        'charge_succeeded' =>
+            \App\Jobs\ProcessStripeWebhook::class,
+
+        'payment_intent_succeeded' =>
+            \App\Jobs\ProcessStripeWebhook::class,
+
+        'checkout_session_completed' =>
+            \App\Jobs\ProcessStripeWebhook::class,
+
     ],
 
     /*
