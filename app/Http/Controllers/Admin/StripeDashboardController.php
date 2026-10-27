@@ -10,10 +10,13 @@ class StripeDashboardController extends Controller
     public function orders()
     {
         $orders = DB::table('webhook_calls')
-            ->where(function ($q) {
-                $q->whereRaw("JSON_EXTRACT(payload, '$.type') LIKE '%checkout.session.completed%'");
-
-            })
+            ->whereIn(
+                DB::raw("JSON_UNQUOTE(JSON_EXTRACT(payload, '$.type'))"),
+                [
+                    'checkout.session.completed',
+                    'payment_intent.succeeded',
+                ]
+            )
             ->orderBy('created_at', 'desc')
             ->paginate(25);
 
