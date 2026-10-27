@@ -76,7 +76,7 @@ Route::get('/admin/stripe/transactions/sync', [StripeDashboardController::class,
 */
 
 
-Route::stripeWebhooks('stripe/webhook');
+//Route::stripeWebhooks('stripe/webhook');
 
 
 //Route::webhooks('stripe/webhook', 'stripe')
