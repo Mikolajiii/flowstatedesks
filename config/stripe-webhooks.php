@@ -26,12 +26,6 @@ return [
         'charge_succeeded' =>
             \App\Jobs\ProcessStripeWebhook::class,
 
-        'payment_intent_succeeded' =>
-            \App\Jobs\ProcessStripeWebhook::class,
-
-        'checkout_session_completed' =>
-            \App\Jobs\ProcessStripeWebhook::class,
-
     ],
 
     /*
