@@ -49,12 +49,15 @@ class ProcessStripeWebhook extends ProcessStripeWebhookJob
             'event_id' => $payload['id'] ?? null,
             'event_type' => $eventType,
             'object_type' => $object['object'] ?? null,
-            'amount' => $object['amount'] ?? null,
+
+            // 🧠 Fix: Fallback to checkout session properties if payment intent keys are missing
+            'amount' => $object['amount'] ?? $object['amount_total'] ?? null,
             'currency' => $object['currency'] ?? null,
             'customer' => $object['customer'] ?? null,
             'payment_intent' => $object['payment_intent'] ?? null,
             'charge' => $object['charge'] ?? null,
-            'status' => $object['status'] ?? null,
+            'status' => $object['status'] ?? $object['payment_status'] ?? null,
+
             'metadata' => $object['metadata'] ?? [],
             'raw' => $payload,
         ];
