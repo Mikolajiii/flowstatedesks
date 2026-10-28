@@ -7,6 +7,11 @@
             {{ session('success') }}
         </div>
     @endif
+    @if(session('error'))
+        <div class="mb-4 p-3 bg-red-100 text-red-800 rounded">
+            {{ session('error') }}
+        </div>
+    @endif
 
     <a href="{{ route('admin.stripe.dashboard') }}"
        class="inline-block mb-4 px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition">
@@ -24,11 +29,14 @@
             <th class="px-3 py-2 text-left">ID</th>
             <th class="px-3 py-2 text-left">Event</th>
             <th class="px-3 py-2 text-left">Name</th>
+            <th class="px-3 py-2 text-left">Card</th>
             <th class="px-3 py-2 text-left">Status</th>
-            <th class="px-3 py-2 text-right">Amount</th>
+            <th class="px-3 py-2 text-right">Gross</th>
+            <th class="px-3 py-2 text-right">Fee</th>
+            <th class="px-3 py-2 text-right">Net</th>
             <th class="px-3 py-2 text-left">Currency</th>
             <th class="px-3 py-2 text-left">Created</th>
-            <th class="px-3 py-2 text-left"></th>
+            <th></th>
         </tr>
         </thead>
 
@@ -47,39 +55,104 @@
             @endphp
 
             <tr>
-                <td class="px-3 py-2 text-left">{{ $txn->id }}</td>
-                <td class="px-3 py-2 text-left">{{ $eventType }}</td>
+                <td class="px-3 py-2 text-left">
+                    {{ $txn->id }}
+                </td>
+
+                <td class="px-3 py-2 text-left">
+                    {{ $eventType }}
+                </td>
+
                 <td class="px-3 py-2 text-left">
                     {{ $txn->buyer_name ?? 'N/A' }}
                 </td>
 
-                <td>
-                    @if($txn->payout_status === 'paid')
-                        <span class="badge bg-success">Paid to Bank</span>
-                    @elseif($txn->payout_status === 'pending')
-                        <span class="badge bg-warning">Pending</span>
+                {{-- Card --}}
+                <td class="px-3 py-2 text-left">
+                    @if($txn->card_brand && $txn->last4)
+                        {{ strtoupper($txn->card_brand) }}
+                        ****{{ $txn->last4 }}
                     @else
-                        <span class="badge bg-secondary">N/A</span>
+                        -
                     @endif
                 </td>
 
+                {{-- Status --}}
+                <td class="px-3 py-2 text-left">
+                    @if($txn->payout_status === 'paid')
+                        <span class="badge bg-success">
+                Paid to Bank
+            </span>
+                    @elseif($txn->payout_status === 'pending')
+                        <span class="badge bg-warning">
+                Pending
+            </span>
+                    @else
+                        <span class="badge bg-secondary">
+                N/A
+            </span>
+                    @endif
+                </td>
 
+                {{-- Gross --}}
                 <td class="px-3 py-2 text-right">
-                    @if(!is_null($amount))
+                    @if($txn->gross)
+                        ${{ number_format($txn->gross / 100, 2) }}
+                    @elseif(!is_null($amount))
                         ${{ number_format($amount / 100, 2) }}
                     @else
                         -
                     @endif
                 </td>
-                <td class="px-3 py-2 text-left">{{ $currency }}</td>
+
+                {{-- Fee --}}
+                <td class="px-3 py-2 text-right text-red-600">
+                    @if($txn->fee)
+                        ${{ number_format($txn->fee / 100, 2) }}
+                    @else
+                        -
+                    @endif
+                </td>
+
+                {{-- Net --}}
+                <td class="px-3 py-2 text-right text-green-600 font-semibold">
+                    @if($txn->net)
+                        ${{ number_format($txn->net / 100, 2) }}
+                    @else
+                        -
+                    @endif
+                </td>
+
+                {{-- Currency --}}
+                <td class="px-3 py-2 text-left">
+                    {{ strtoupper($currency) }}
+                </td>
+
+                {{-- Created --}}
                 <td class="px-3 py-2 text-left">
                     {{ \Carbon\Carbon::parse($txn->created_at)->format('F j, Y g:i A') }}
                 </td>
 
+                {{-- Actions --}}
                 <td class="px-3 py-2 text-left">
-                    <a href="{{ route('admin.stripe.transactions.show', $txn->id) }}" class="text-blue-600">
-                        View
-                    </a>
+                    <div class="flex gap-3">
+                        <a
+                            href="{{ route('admin.stripe.transactions.show', $txn->id) }}"
+                            class="text-blue-600 hover:underline"
+                        >
+                            View
+                        </a>
+
+                        @if($txn->receipt_url)
+                            <a
+                                href="{{ $txn->receipt_url }}"
+                                target="_blank"
+                                class="text-green-600 hover:underline"
+                            >
+                                Receipt
+                            </a>
+                        @endif
+                    </div>
                 </td>
             </tr>
         @endforeach

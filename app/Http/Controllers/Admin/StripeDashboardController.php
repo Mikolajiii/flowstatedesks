@@ -4,171 +4,134 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Stripe\Exception\ApiErrorException;
+use Stripe\Stripe;
 
 class StripeDashboardController extends Controller
 {
+    private const ORDER_EVENT_TYPES = [
+        'checkout.session.completed',
+    ];
+
+    private const TRANSACTION_EVENT_TYPES = [
+        'payout.paid',
+        'payout.created',
+        'balance.available',
+        'charge.refunded',
+        'charge.updated',
+        'charge.succeeded',
+        'checkout.session.completed',
+    ];
+
+    private const PER_PAGE = 25;
+
     public function orders()
     {
-        $orders = DB::table('webhook_calls')
-            ->whereIn(
-                DB::raw("JSON_UNQUOTE(JSON_EXTRACT(payload, '$.type'))"),
-                [
-                    'checkout.session.completed',
-                    'payment_intent.succeeded',
-                ]
-            )
+        $orders = $this->webhookCallsOfType(self::ORDER_EVENT_TYPES)
             ->orderBy('created_at', 'desc')
-            ->paginate(25);
+            ->paginate(self::PER_PAGE);
 
-        // Attach metadata + buyer info
         foreach ($orders as $order) {
-
-            $payload = json_decode($order->payload, true);
-            $obj = $payload['data']['object'] ?? [];
+            $obj = $this->stripeObject($order);
+            $metadata = $obj['metadata'] ?? [];
 
             // Metadata (legacy single-product fields)
-            $order->product        = $obj['metadata']['product']        ?? null;
-            $order->description    = $obj['metadata']['description']    ?? null;
-            $order->price_id       = $obj['metadata']['price_id']       ?? null;
+            $order->product     = $metadata['product'] ?? null;
+            $order->description = $metadata['description'] ?? null;
+            $order->price_id    = $metadata['price_id'] ?? null;
 
-            // ⭐ NEW: Full cart items
-            $itemsJson = $obj['metadata']['items'] ?? null;
-            $order->items = $itemsJson ? json_decode($itemsJson, true) : [];
+            // Full cart items (stored as a JSON string in the session metadata)
+            $items = isset($metadata['items']) ? json_decode($metadata['items'], true) : [];
+            $order->items = is_array($items) ? $items : [];
 
-            // Buyer name (checkout.session.completed)
-            $order->buyer_name     = $obj['customer_details']['name']   ?? null;
-            $order->buyer_email    = $obj['customer_details']['email']  ?? null;
+            // checkout.session.completed first, then charge.succeeded fallbacks
+            $order->buyer_name = $this->firstFilled(
+                $obj['customer_details']['name'] ?? null,
+                $obj['billing_details']['name'] ?? null,
+                $obj['shipping']['name'] ?? null,
+            );
 
-            // Fallbacks for charge.succeeded
-            if (!$order->buyer_name && !empty($obj['billing_details']['name'])) {
-                $order->buyer_name = $obj['billing_details']['name'];
-            }
-
-            if (!$order->buyer_email && !empty($obj['billing_details']['email'])) {
-                $order->buyer_email = $obj['billing_details']['email'];
-            }
-
-            if (!$order->buyer_name && !empty($obj['shipping']['name'])) {
-                $order->buyer_name = $obj['shipping']['name'];
-            }
-
-            // Logging (unchanged)
-            \Log::info('TYPE DEBUG', [
-                'raw_type' => $payload['type'] ?? null,
-            ]);
-
-            \Log::info('METADATA DEBUG', [
-                'id'       => $order->id,
-                'metadata' => $obj['metadata'] ?? null,
-            ]);
-
-            \Log::info('PRODUCT FIELD', [
-                'id'      => $order->id,
-                'product' => $obj['metadata']['product'] ?? null,
-            ]);
+            $order->buyer_email = $this->firstFilled(
+                $obj['customer_details']['email'] ?? null,
+                $obj['billing_details']['email'] ?? null,
+            );
         }
-
 
         return view('admin.stripe.orders.index', compact('orders'));
     }
 
-
-
     public function orderShow($id)
     {
-        $hook = DB::table('webhook_calls')->where('id', $id)->first();
-        if (! $hook) abort(404);
-
-        $hook->payload = json_decode($hook->payload, true);
-        $hook->processed_payload = json_decode($hook->processed_payload, true);
-        $hook->headers = json_decode($hook->headers, true);
-        $hook->attachments = json_decode($hook->attachments, true);
+        $hook = $this->findHook($id);
 
         return view('admin.stripe.orders.show', compact('hook'));
     }
 
-
-
     public function transactions()
     {
-        $transactions = DB::table('webhook_calls')
-            ->where(function ($q) {
-                $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(payload, '$.type')) = 'payout.paid'")
-                    ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(payload, '$.type')) = 'payout.created'")
-                    ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(payload, '$.type')) = 'balance.available'")
-                    ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(payload, '$.type')) = 'charge.refunded'")
-                    ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(payload, '$.type')) = 'charge.updated'")
-                    ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(payload, '$.type')) = 'charge.succeeded'")
-                    ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(payload, '$.type')) = 'checkout.session.completed'");
-            })
+        $transactions = $this->webhookCallsOfType(self::TRANSACTION_EVENT_TYPES)
             ->orderBy('id', 'desc')
-            ->paginate(25);
+            ->paginate(self::PER_PAGE);
 
         foreach ($transactions as $txn) {
+            $obj = $this->stripeObject($txn);
 
-            $payload = json_decode($txn->payload, true);
-            $obj = $payload['data']['object'] ?? [];
+            $txn->buyer_name = $this->firstFilled(
+                $obj['billing_details']['name'] ?? null,
+                $obj['shipping']['name'] ?? null,
+                $obj['customer_details']['name'] ?? null,
+            );
 
-            $name = null;
+            $txn->payout_status = ($obj['object'] ?? null) === 'payout'
+                ? ($obj['status'] ?? null)
+                : null;
 
-            // charge.succeeded → billing_details.name
-            if (!empty($obj['billing_details']['name'])) {
-                $name = $obj['billing_details']['name'];
-            }
+            $txn->gross_amount = $txn->gross
+                ? $txn->gross / 100
+                : null;
 
-            // fallback → shipping.name
-            if (!$name && !empty($obj['shipping']['name'])) {
-                $name = $obj['shipping']['name'];
-            }
+            $txn->fee_amount = $txn->fee
+                ? $txn->fee / 100
+                : null;
 
-            // checkout.session.completed → customer_details.name
-            if (!$name && !empty($obj['customer_details']['name'])) {
-                $name = $obj['customer_details']['name'];
-            }
-
-            $txn->buyer_name = $name;
+            $txn->net_amount = $txn->net
+                ? $txn->net / 100
+                : null;
         }
 
         return view('admin.stripe.transactions.index', compact('transactions'));
     }
 
-
-
     public function transactionShow($id)
     {
-        $hook = DB::table('webhook_calls')->where('id', $id)->first();
-        if (! $hook) abort(404);
-
-        $hook->payload = json_decode($hook->payload, true);
-        $hook->processed_payload = json_decode($hook->processed_payload, true);
-        $hook->headers = json_decode($hook->headers, true);
-        $hook->attachments = json_decode($hook->attachments, true);
+        $hook = $this->findHook($id);
 
         return view('admin.stripe.transactions.show', compact('hook'));
     }
+
     public function sync()
     {
-        \Stripe\Stripe::setApiKey(config('stripe.stripe.secret'));
+        Stripe::setApiKey(config('stripe.stripe.secret'));
 
-        // Fetch latest charges
-        $charges = \Stripe\Charge::all(['limit' => 20]);
+        try {
+            foreach (\Stripe\Charge::all(['limit' => 20])->data as $charge) {
+                $this->storeStripeEvent('charge.succeeded', $charge);
+            }
 
-        foreach ($charges->data as $charge) {
-            $this->storeStripeEvent('charge.succeeded', $charge);
-        }
+            foreach (\Stripe\Payout::all(['limit' => 20])->data as $payout) {
+                $this->storeStripeEvent('payout.paid', $payout);
+            }
 
-        // Fetch latest payouts
-        $payouts = \Stripe\Payout::all(['limit' => 20]);
+            foreach (\Stripe\Refund::all(['limit' => 20])->data as $refund) {
+                $this->storeStripeEvent('charge.refunded', $refund);
+            }
+        } catch (ApiErrorException $e) {
+            Log::error('Stripe sync failed', ['message' => $e->getMessage()]);
 
-        foreach ($payouts->data as $payout) {
-            $this->storeStripeEvent('payout.paid', $payout);
-        }
-
-        // Fetch latest refunds
-        $refunds = \Stripe\Refund::all(['limit' => 20]);
-
-        foreach ($refunds->data as $refund) {
-            $this->storeStripeEvent('charge.refunded', $refund);
+            return redirect()
+                ->route('admin.stripe.transactions')
+                ->with('error', 'Stripe sync failed: ' . $e->getMessage());
         }
 
         return redirect()
@@ -176,32 +139,75 @@ class StripeDashboardController extends Controller
             ->with('success', 'Stripe sync completed successfully.');
     }
 
-    protected function storeStripeEvent(string $type, $object)
+    protected function storeStripeEvent(string $type, $object): void
     {
-        $id = $object->id;
-
         // Avoid duplicates
-        $exists = DB::table('webhook_calls')
-            ->where('stripe_id', $id)
-            ->exists();
-
-        if ($exists) {
+        if (DB::table('webhook_calls')->where('stripe_id', $object->id)->exists()) {
             return;
         }
 
         DB::table('webhook_calls')->insert([
-            'name' => $type,
-            'stripe_id' => $id,
-            'payload' => json_encode([
+            'name'              => $type,
+            'stripe_id'         => $object->id,
+            'payload'           => json_encode([
                 'type' => $type,
                 'data' => ['object' => $object],
             ]),
             'processed_payload' => json_encode([]),
-            'headers' => json_encode([]),
-            'created_at' => now(),
-            'updated_at' => now(),
+            'headers'           => json_encode([]),
+            'created_at'        => now(),
+            'updated_at'        => now(),
         ]);
     }
 
+    /**
+     * Base query for webhook calls whose payload "type" is one of the given event types.
+     */
+    private function webhookCallsOfType(array $types)
+    {
+        $placeholders = implode(', ', array_fill(0, count($types), '?'));
 
+        return DB::table('webhook_calls')
+            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(payload, '$.type')) IN ($placeholders)", $types);
+    }
+
+    /**
+     * Load a webhook call with its JSON columns decoded, or 404.
+     */
+    private function findHook($id): object
+    {
+        $hook = DB::table('webhook_calls')->where('id', $id)->first();
+
+        abort_if(! $hook, 404);
+
+        foreach (['payload', 'processed_payload', 'headers', 'attachments'] as $column) {
+            $hook->{$column} = json_decode($hook->{$column} ?? 'null', true);
+        }
+
+        return $hook;
+    }
+
+    /**
+     * The Stripe object (data.object) inside a webhook call's raw JSON payload.
+     */
+    private function stripeObject(object $row): array
+    {
+        $payload = json_decode($row->payload ?? 'null', true);
+
+        return $payload['data']['object'] ?? [];
+    }
+
+    /**
+     * Return the first non-empty value, or null.
+     */
+    private function firstFilled(mixed ...$values): mixed
+    {
+        foreach ($values as $value) {
+            if (! empty($value)) {
+                return $value;
+            }
+        }
+
+        return null;
+    }
 }
