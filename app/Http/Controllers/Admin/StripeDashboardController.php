@@ -107,6 +107,22 @@ class StripeDashboardController extends Controller
     {
         $hook = $this->findHook($id);
 
+        $payload = json_decode($hook->payload, true);
+
+        $hook->event_type = $payload['type'] ?? null;
+
+        $hook->gross_amount = $hook->gross
+            ? $hook->gross / 100
+            : null;
+
+        $hook->fee_amount = $hook->fee
+            ? $hook->fee / 100
+            : null;
+
+        $hook->net_amount = $hook->net
+            ? $hook->net / 100
+            : null;
+
         return view('admin.stripe.transactions.show', compact('hook'));
     }
 
@@ -141,20 +157,70 @@ class StripeDashboardController extends Controller
 
     protected function storeStripeEvent(string $type, $object): void
     {
-        // Avoid duplicates
-        if (DB::table('webhook_calls')->where('stripe_id', $object->id)->exists()) {
+        if (DB::table('webhook_calls')
+            ->where('stripe_id', $object->id)
+            ->exists()) {
             return;
+        }
+
+        $gross = null;
+        $fee = null;
+        $net = null;
+        $cardBrand = null;
+        $last4 = null;
+        $receiptUrl = null;
+
+        if ($type === 'charge.succeeded') {
+
+            $gross = $object->amount ?? null;
+
+            $receiptUrl = $object->receipt_url ?? null;
+
+            $cardBrand = $object->payment_method_details->card->brand ?? null;
+
+            $last4 = $object->payment_method_details->card->last4 ?? null;
+
+            if (!empty($object->balance_transaction)) {
+
+                try {
+                    $balanceTxn = \Stripe\BalanceTransaction::retrieve(
+                        $object->balance_transaction
+                    );
+
+                    $fee = $balanceTxn->fee ?? null;
+                    $net = $balanceTxn->net ?? null;
+
+                } catch (\Exception $e) {
+                    Log::warning('Unable to retrieve balance transaction', [
+                        'charge_id' => $object->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
         }
 
         DB::table('webhook_calls')->insert([
             'name'              => $type,
             'stripe_id'         => $object->id,
+
+            'gross'             => $gross,
+            'fee'               => $fee,
+            'net'               => $net,
+
+            'card_brand'        => $cardBrand,
+            'last4'             => $last4,
+            'receipt_url'       => $receiptUrl,
+
             'payload'           => json_encode([
                 'type' => $type,
-                'data' => ['object' => $object],
+                'data' => [
+                    'object' => $object,
+                ],
             ]),
+
             'processed_payload' => json_encode([]),
             'headers'           => json_encode([]),
+
             'created_at'        => now(),
             'updated_at'        => now(),
         ]);
