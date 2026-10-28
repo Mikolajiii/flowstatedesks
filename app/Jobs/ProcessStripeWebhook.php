@@ -85,6 +85,13 @@ class ProcessStripeWebhook extends ProcessStripeWebhookJob
                 $session = $object;
                 $orderId = $session['id'] ?? null;
                 $total = $session['amount_total'] ?? null;
+                $webhook->gross = $total;
+                $webhook->fee = null;
+                $webhook->net = null;
+                $webhook->card_brand = null;
+                $webhook->last4 = null;
+                $webhook->receipt_url = null;
+                $webhook->save();
 
                 // Extract buyer info from Stripe JSON
                 $customerDetails = $session['customer_details'] ?? [];
@@ -144,6 +151,29 @@ class ProcessStripeWebhook extends ProcessStripeWebhookJob
                 $webhook->payout_status = 'failed';
                 $webhook->payout_at = null;
                 $webhook->save();
+                break;
+            case 'charge.succeeded':
+
+                Log::info('💳 charge.succeeded fired');
+
+                $charge = $object;
+
+                $webhook->gross = $charge['amount'] ?? null;
+
+                $webhook->card_brand =
+                    $charge['payment_method_details']['card']['brand']
+                    ?? null;
+
+                $webhook->last4 =
+                    $charge['payment_method_details']['card']['last4']
+                    ?? null;
+
+                $webhook->receipt_url =
+                    $charge['receipt_url']
+                    ?? null;
+
+                $webhook->save();
+
                 break;
 
             default:

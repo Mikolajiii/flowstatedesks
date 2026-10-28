@@ -10,13 +10,12 @@
     <h1 class="text-2xl font-bold mb-6">
         Transaction #{{ $hook->id }}
     </h1>
-
     <div class="bg-white border rounded-lg p-6 mb-6">
         <h2 class="text-lg font-semibold mb-4">
             Transaction Summary
         </h2>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-6">
 
             <div>
                 <strong>Event Type:</strong><br>
@@ -29,7 +28,7 @@
             </div>
 
             <div>
-                <strong>Gross:</strong><br>
+                <strong>Gross Amount:</strong><br>
                 @if($hook->gross)
                     ${{ number_format($hook->gross / 100, 2) }}
                 @else
@@ -38,22 +37,22 @@
             </div>
 
             <div>
-                <strong>Fee:</strong><br>
+                <strong>Stripe Fee:</strong><br>
                 @if($hook->fee)
                     <span class="text-red-600">
-                        ${{ number_format($hook->fee / 100, 2) }}
-                    </span>
+                    ${{ number_format($hook->fee / 100, 2) }}
+                </span>
                 @else
                     -
                 @endif
             </div>
 
             <div>
-                <strong>Net:</strong><br>
+                <strong>Net Deposit:</strong><br>
                 @if($hook->net)
                     <span class="text-green-600 font-semibold">
-                        ${{ number_format($hook->net / 100, 2) }}
-                    </span>
+                    ${{ number_format($hook->net / 100, 2) }}
+                </span>
                 @else
                     -
                 @endif
@@ -61,17 +60,29 @@
 
             <div>
                 <strong>Payout Status:</strong><br>
-                {{ $hook->payout_status ?? 'N/A' }}
+
+                @if($hook->payout_status === 'paid')
+                    <span class="text-green-600 font-semibold">
+                    Paid to Bank
+                </span>
+                @elseif($hook->payout_status === 'pending')
+                    <span class="text-amber-600 font-semibold">
+                    Pending
+                </span>
+                @else
+                    N/A
+                @endif
             </div>
 
             <div>
-                <strong>Card Brand:</strong><br>
-                {{ $hook->card_brand ? strtoupper($hook->card_brand) : 'N/A' }}
-            </div>
+                <strong>Card:</strong><br>
 
-            <div>
-                <strong>Last 4:</strong><br>
-                {{ $hook->last4 ?? 'N/A' }}
+                @if($hook->card_brand && $hook->last4)
+                    {{ strtoupper($hook->card_brand) }}
+                    ****{{ $hook->last4 }}
+                @else
+                    N/A
+                @endif
             </div>
 
             <div>
@@ -84,18 +95,26 @@
                 {{ $hook->created_at }}
             </div>
 
+            <div>
+                <strong>Updated:</strong><br>
+                {{ $hook->updated_at }}
+            </div>
+
         </div>
 
         @if($hook->receipt_url)
-            <div class="mt-6">
+            <div class="mt-6 border-t pt-4">
+
                 <a href="{{ $hook->receipt_url }}"
                    target="_blank"
                    class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-                    View Receipt
+                    View Stripe Receipt
                 </a>
+
             </div>
         @endif
     </div>
+
 
     @if($hook->processed_payload)
         <div class="mb-6">
