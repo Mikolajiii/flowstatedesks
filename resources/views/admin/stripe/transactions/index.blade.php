@@ -77,18 +77,30 @@
                 </td>
 
                 <td class="px-3 py-2">
-                    @if($txn->payout_status === 'paid')
+                    @if($txn->display_status === 'paid')
                         <span class="badge bg-success">
-                Paid to Bank
-            </span>
-                    @elseif($txn->payout_status === 'pending')
+            Paid
+        </span>
+
+                    @elseif($txn->display_status === 'succeeded')
+                        <span class="badge bg-success">
+            Succeeded
+        </span>
+
+                    @elseif($txn->display_status === 'pending')
                         <span class="badge bg-warning">
-                Pending
-            </span>
+            Pending
+        </span>
+
+                    @elseif($txn->display_status)
+                        <span class="badge bg-secondary">
+            {{ ucfirst($txn->display_status) }}
+        </span>
+
                     @else
                         <span class="badge bg-secondary">
-                N/A
-            </span>
+            N/A
+        </span>
                     @endif
                 </td>
 

@@ -83,9 +83,18 @@ class StripeDashboardController extends Controller
                 $obj['customer_details']['name'] ?? null,
             );
 
-            $txn->payout_status = ($obj['object'] ?? null) === 'payout'
-                ? ($obj['status'] ?? null)
-                : null;
+            $txn->display_status = match ($obj['object'] ?? null) {
+
+                'checkout.session' => $obj['payment_status'] ?? null,
+
+                'charge' => $obj['status'] ?? null,
+
+                'payment_intent' => $obj['status'] ?? null,
+
+                'payout' => $obj['status'] ?? null,
+
+                default => null,
+            };
 
 
         }
