@@ -87,17 +87,7 @@ class StripeDashboardController extends Controller
                 ? ($obj['status'] ?? null)
                 : null;
 
-            $txn->gross_amount = $txn->gross
-                ? $txn->gross / 100
-                : null;
 
-            $txn->fee_amount = $txn->fee
-                ? $txn->fee / 100
-                : null;
-
-            $txn->net_amount = $txn->net
-                ? $txn->net / 100
-                : null;
         }
 
         return view('admin.stripe.transactions.index', compact('transactions'));
@@ -170,7 +160,10 @@ class StripeDashboardController extends Controller
         $last4 = null;
         $receiptUrl = null;
 
-        if ($type === 'charge.succeeded') {
+        if (
+            $type === 'charge.succeeded'
+            && ($object->object ?? null) === 'charge'
+        ) {
 
             $gross = $object->amount ?? null;
 

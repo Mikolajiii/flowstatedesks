@@ -55,20 +55,19 @@
             @endphp
 
             <tr>
-                <td class="px-3 py-2 text-left">
+                <td class="px-3 py-2">
                     {{ $txn->id }}
                 </td>
 
-                <td class="px-3 py-2 text-left">
+                <td class="px-3 py-2">
                     {{ $eventType }}
                 </td>
 
-                <td class="px-3 py-2 text-left">
+                <td class="px-3 py-2">
                     {{ $txn->buyer_name ?? 'N/A' }}
                 </td>
 
-                {{-- Card --}}
-                <td class="px-3 py-2 text-left">
+                <td class="px-3 py-2">
                     @if($txn->card_brand && $txn->last4)
                         {{ strtoupper($txn->card_brand) }}
                         ****{{ $txn->last4 }}
@@ -77,8 +76,7 @@
                     @endif
                 </td>
 
-                {{-- Status --}}
-                <td class="px-3 py-2 text-left">
+                <td class="px-3 py-2">
                     @if($txn->payout_status === 'paid')
                         <span class="badge bg-success">
                 Paid to Bank
@@ -94,7 +92,6 @@
                     @endif
                 </td>
 
-                {{-- Gross --}}
                 <td class="px-3 py-2 text-right">
                     @if($txn->gross)
                         ${{ number_format($txn->gross / 100, 2) }}
@@ -105,7 +102,6 @@
                     @endif
                 </td>
 
-                {{-- Fee --}}
                 <td class="px-3 py-2 text-right text-red-600">
                     @if($txn->fee)
                         ${{ number_format($txn->fee / 100, 2) }}
@@ -114,7 +110,6 @@
                     @endif
                 </td>
 
-                {{-- Net --}}
                 <td class="px-3 py-2 text-right text-green-600 font-semibold">
                     @if($txn->net)
                         ${{ number_format($txn->net / 100, 2) }}
@@ -123,18 +118,15 @@
                     @endif
                 </td>
 
-                {{-- Currency --}}
-                <td class="px-3 py-2 text-left">
+                <td class="px-3 py-2">
                     {{ strtoupper($currency) }}
                 </td>
 
-                {{-- Created --}}
-                <td class="px-3 py-2 text-left">
+                <td class="px-3 py-2">
                     {{ \Carbon\Carbon::parse($txn->created_at)->format('F j, Y g:i A') }}
                 </td>
 
-                {{-- Actions --}}
-                <td class="px-3 py-2 text-left">
+                <td class="px-3 py-2">
                     <div class="flex gap-3">
                         <a
                             href="{{ route('admin.stripe.transactions.show', $txn->id) }}"
