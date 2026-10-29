@@ -23,7 +23,8 @@ use App\Services\SendGridService;
 use Spatie\StripeWebhooks\ProcessStripeWebhookJob;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-
+use Stripe\Stripe;
+use Stripe\Checkout\Session;
 class ProcessStripeWebhook extends ProcessStripeWebhookJob
 {
     public function handle()
@@ -36,7 +37,22 @@ class ProcessStripeWebhook extends ProcessStripeWebhookJob
         ]);
 
         $eventType = $payload['type'] ?? null;
-        $object = $payload['data']['object'] ?? [];
+
+// Classic Stripe event (sandbox)
+        $object = $payload['data']['object'] ?? null;
+
+// Stripe thin event (live)
+        if (
+            !$object &&
+            ($payload['object'] ?? null) === 'v2.core.event'
+        ) {
+            $object = $payload['related_object'] ?? [];
+        }
+
+        Log::info('STRIPE OBJECT DEBUG', [
+            'event_type' => $eventType,
+            'object' => $object,
+        ]);
 
         // 🔥 LOG: Webhook received
         Log::channel('single')->info("🔥 Stripe Webhook Received", [
@@ -76,52 +92,90 @@ class ProcessStripeWebhook extends ProcessStripeWebhookJob
         switch ($eventType) {
 
             case 'payment_intent.succeeded':
+            case 'v1.payment_intent.succeeded':
                 Log::info("⚡ payment_intent.succeeded fired");
                 break;
 
             case 'checkout.session.completed':
-                Log::info("🎉 checkout.session.completed fired");
+            case 'v1.checkout.session.completed':
 
-                $session = $object;
-                $orderId = $session['id'] ?? null;
-                $total = $session['amount_total'] ?? null;
+                Log::info('🎉 checkout.session.completed fired');
+
+                // LIVE STRIPE THIN EVENT
+                if (($payload['object'] ?? null) === 'v2.core.event') {
+
+                    Stripe::setApiKey(config('services.stripe.secret'));
+
+                    $sessionId = $payload['related_object']['id'] ?? null;
+
+                    if (!$sessionId) {
+
+                        Log::error('No checkout session ID found');
+
+                        break;
+                    }
+
+                    try {
+
+
+                        $session = Session::retrieve($sessionId);
+
+
+
+                        $session = $session->toArray();
+                        Log::info('CHECKOUT SESSION STRUCTURE', [
+                            'keys' => array_keys($session)
+                        ]);
+
+                        Log::info('✅ FULL STRIPE SESSION RETRIEVED', [
+                            'session_id' => $sessionId,
+                            'email' => $session['customer_details']['email'] ?? null,
+                        ]);
+
+                        // overwrite object with actual session
+                        $object = $session;
+
+                        // save full session for admin panel
+                        $webhook->processed_payload = $session;
+                        $webhook->save();
+
+                    } catch (\Exception $e) {
+
+                        Log::error('Failed retrieving Stripe session', [
+                            'message' => $e->getMessage(),
+                            'session_id' => $sessionId,
+                        ]);
+
+
+                    }
+                }
+
+                $orderId = $object['id'] ?? null;
+                $total = $object['amount_total'] ?? null;
+
                 $webhook->gross = $total;
                 $webhook->fee = null;
                 $webhook->net = null;
-                $webhook->card_brand = null;
-                $webhook->last4 = null;
-                $webhook->receipt_url = null;
-                $webhook->save();
 
-                // Extract buyer info from Stripe JSON
-                $customerDetails = $session['customer_details'] ?? [];
+                $customerDetails = $object['customer_details'] ?? [];
+
                 $customerEmail = $customerDetails['email'] ?? null;
                 $customerName = $customerDetails['name'] ?? 'Flow State Customer';
 
-                Log::info("📧 Sending customer email...", [
+                $webhook->save();
+
+                Log::info('Customer Info', [
+                    'email' => $customerEmail,
+                    'name' => $customerName,
                     'order_id' => $orderId,
                     'total' => $total,
-                    'customer_email' => $customerEmail,
-                    'customer_name' => $customerName,
                 ]);
 
-                // SendGrid dynamic template email
-                $result = app(SendGridService::class)->sendTemplate(
-                    'WELCOME_MESSAGE',
-                    'michaelkondakow@gmail.com',
-                    'Michael',
-                    [
-                        'message' => "You have a new order!",
-                        'order_id' => $orderId,
-                        'total' => $total,
-                    ]
-                );
+                break;
 
-                Log::info("📨 SendGrid result", [
-                    'success' => $result,
-                ]);
 
-                Log::info("🟢 CHECKOUT BLOCK REACHED");
+
+
                 break;
 
             case 'payout.created':
@@ -153,6 +207,7 @@ class ProcessStripeWebhook extends ProcessStripeWebhookJob
                 $webhook->save();
                 break;
             case 'charge.succeeded':
+            case 'v1.charge.succeeded':
 
                 Log::info('💳 charge.succeeded fired');
 
