@@ -632,7 +632,7 @@
 
                     <div class="flex items-center gap-4">
           <span class="text-xl font-semibold text-neutral-900">
-            $2.00
+            $449.00
           </span>
 
                     </div>
