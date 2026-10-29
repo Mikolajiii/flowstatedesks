@@ -12,16 +12,25 @@ class StripeDashboardController extends Controller
 {
     private const ORDER_EVENT_TYPES = [
         'checkout.session.completed',
+        'v1.checkout.session.completed',
     ];
 
     private const TRANSACTION_EVENT_TYPES = [
         'payout.paid',
         'payout.created',
         'balance.available',
+
         'charge.refunded',
+        'v1.charge.refunded',
+
         'charge.updated',
+        'v1.charge.updated',
+
         'charge.succeeded',
+        'v1.charge.succeeded',
+
         'checkout.session.completed',
+        'v1.checkout.session.completed',
     ];
 
     private const PER_PAGE = 25;
@@ -260,7 +269,19 @@ class StripeDashboardController extends Controller
      */
     private function stripeObject(object $row): array
     {
-        $payload = json_decode($row->payload ?? 'null', true);
+        $processed = json_decode(
+            $row->processed_payload ?? 'null',
+            true
+        );
+
+        if (!empty($processed)) {
+            return $processed;
+        }
+
+        $payload = json_decode(
+            $row->payload ?? 'null',
+            true
+        );
 
         return $payload['data']['object'] ?? [];
     }
