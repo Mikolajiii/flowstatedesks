@@ -42,19 +42,26 @@ class StripeDashboardController extends Controller
             ->paginate(self::PER_PAGE);
 
         foreach ($orders as $order) {
+
             $obj = $this->stripeObject($order);
+
             $metadata = $obj['metadata'] ?? [];
 
-            // Metadata (legacy single-product fields)
-            $order->product     = $metadata['product'] ?? null;
+            // Product info
+            $order->product = $metadata['product'] ?? null;
             $order->description = $metadata['description'] ?? null;
-            $order->price_id    = $metadata['price_id'] ?? null;
+            $order->price_id = $metadata['price_id'] ?? null;
 
-            // Full cart items (stored as a JSON string in the session metadata)
-            $items = isset($metadata['items']) ? json_decode($metadata['items'], true) : [];
-            $order->items = is_array($items) ? $items : [];
+            // Cart items
+            $items = isset($metadata['items'])
+                ? json_decode($metadata['items'], true)
+                : [];
 
-            // checkout.session.completed first, then charge.succeeded fallbacks
+            $order->items = is_array($items)
+                ? $items
+                : [];
+
+            // Customer
             $order->buyer_name = $this->firstFilled(
                 $obj['customer_details']['name'] ?? null,
                 $obj['billing_details']['name'] ?? null,
@@ -64,7 +71,23 @@ class StripeDashboardController extends Controller
             $order->buyer_email = $this->firstFilled(
                 $obj['customer_details']['email'] ?? null,
                 $obj['billing_details']['email'] ?? null,
+                $obj['receipt_email'] ?? null,
             );
+
+            // Amount
+            $order->amount = $obj['amount_total']
+                ?? $obj['amount']
+                ?? null;
+
+            // Currency
+            $order->currency = strtoupper(
+                $obj['currency'] ?? ''
+            );
+
+            // Status
+            $order->status = $obj['payment_status']
+                ?? $obj['status']
+                ?? null;
         }
 
         return view('admin.stripe.orders.index', compact('orders'));
