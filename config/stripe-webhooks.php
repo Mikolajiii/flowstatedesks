@@ -26,15 +26,24 @@ return [
         'payment_intent_created' =>
             \App\Jobs\ProcessStripeWebhook::class,
 
-        'charge_succeeded' =>
+        'payment_intent_succeeded' =>
             \App\Jobs\ProcessStripeWebhook::class,
 
-        'payment_intent_succeeded' =>
+        'charge_succeeded' =>
             \App\Jobs\ProcessStripeWebhook::class,
 
         'checkout_session_completed' =>
             \App\Jobs\ProcessStripeWebhook::class,
 
+        // STRIPE V2 EVENTS
+        'v1_payment_intent_succeeded' =>
+            \App\Jobs\ProcessStripeWebhook::class,
+
+        'v1_charge_succeeded' =>
+            \App\Jobs\ProcessStripeWebhook::class,
+
+        'v1_checkout_session_completed' =>
+            \App\Jobs\ProcessStripeWebhook::class,
     ],
 
     /*
