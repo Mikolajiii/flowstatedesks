@@ -19,7 +19,7 @@ class CartController extends Controller
         ],
         'sidecar' => [
             'name'  => 'FlowState Sidecar',
-            'price' => 44900,
+            'price' => 45000,
             'image' => '/product_photos/flowstate_sidecar/1_RACK_EDITED.webp',
         ],
     ];
