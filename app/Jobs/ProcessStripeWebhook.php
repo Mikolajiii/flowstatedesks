@@ -99,10 +99,16 @@ class ProcessStripeWebhook extends ProcessStripeWebhookJob
             case 'checkout.session.completed':
             case 'v1.checkout.session.completed':
 
-                Log::info('🎉 checkout.session.completed fired');
+                Log::info('CHECKOUT CASE REACHED', [
+                    'event_type' => $eventType,
+                    'webhook_id' => $webhook->id,
+                ]);
 
-                // LIVE STRIPE THIN EVENT
                 if (($payload['object'] ?? null) === 'v2.core.event') {
+
+                    Log::info('STRIPE CONFIG CHECK', [
+                        'has_key' => !empty(config('services.stripe.secret')),
+                    ]);
 
                     Stripe::setApiKey(config('services.stripe.secret'));
 
@@ -110,57 +116,70 @@ class ProcessStripeWebhook extends ProcessStripeWebhookJob
 
                     if (!$sessionId) {
 
-                        Log::error('No checkout session ID found');
+                        Log::error('No checkout session ID found', [
+                            'payload' => $payload,
+                        ]);
 
                         break;
                     }
 
                     try {
 
+                        Log::info('FETCHING CHECKOUT SESSION', [
+                            'session_id' => $sessionId,
+                        ]);
 
                         $session = Session::retrieve($sessionId);
 
-
-
                         $session = $session->toArray();
+
                         Log::info('CHECKOUT SESSION STRUCTURE', [
-                            'keys' => array_keys($session)
+                            'keys' => array_keys($session),
                         ]);
 
-                        Log::info('✅ FULL STRIPE SESSION RETRIEVED', [
-                            'session_id' => $sessionId,
+                        Log::info('FULL STRIPE SESSION RETRIEVED', [
+                            'session_id' => $session['id'] ?? null,
                             'email' => $session['customer_details']['email'] ?? null,
                         ]);
 
-                        // overwrite object with actual session
                         $object = $session;
 
-                        // save full session for admin panel
+                        Log::info('SAVING FULL SESSION TO DB', [
+                            'session_id' => $session['id'] ?? null,
+                        ]);
+
                         $webhook->processed_payload = $session;
                         $webhook->save();
 
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
 
                         Log::error('Failed retrieving Stripe session', [
                             'message' => $e->getMessage(),
                             'session_id' => $sessionId,
+                            'line' => $e->getLine(),
+                            'file' => $e->getFile(),
                         ]);
 
-
+                        break;
                     }
                 }
 
                 $orderId = $object['id'] ?? null;
-                $total = $object['amount_total'] ?? null;
 
-                $webhook->gross = $total;
-                $webhook->fee = null;
-                $webhook->net = null;
+                $total = $object['amount_total']
+                    ?? $object['amount']
+                    ?? null;
 
                 $customerDetails = $object['customer_details'] ?? [];
 
                 $customerEmail = $customerDetails['email'] ?? null;
-                $customerName = $customerDetails['name'] ?? 'Flow State Customer';
+
+                $customerName = $customerDetails['name']
+                    ?? 'Flow State Customer';
+
+                $webhook->gross = $total;
+                $webhook->fee = null;
+                $webhook->net = null;
 
                 $webhook->save();
 
