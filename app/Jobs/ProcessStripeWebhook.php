@@ -31,7 +31,10 @@ class ProcessStripeWebhook extends ProcessStripeWebhookJob
     {
         $webhook = $this->webhookCall;
         $payload = $webhook->payload;
-
+        Log::info('PROCESS STRIPE WEBHOOK JOB STARTED', [
+            'id' => $this->webhookCall->id,
+            'type' => $this->webhookCall->payload['type'] ?? null,
+        ]);
         Log::info("JOB PAYLOAD DEBUG", [
             'payload' => $payload
         ]);
