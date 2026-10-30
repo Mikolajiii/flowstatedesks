@@ -1,72 +1,149 @@
 <?php
 
-/* namespace App\Jobs;
-
-use Spatie\StripeWebhooks\ProcessStripeWebhookJob;
-
-class ProcessStripeWebhook extends ProcessStripeWebhookJob
-{
-    public function handle()
-    {
-        \Log::info('CUSTOM STRIPE WEBHOOK FIRED', [
-            'webhook_id' => $this->webhookCall->id,
-            'payload' => $this->webhookCall->payload,
-        ]);
-    }
-}
-*/
-
-
 namespace App\Jobs;
 
-use App\Services\SendGridService;
 use Spatie\StripeWebhooks\ProcessStripeWebhookJob;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
+use Stripe\Charge;
+use Stripe\PaymentIntent;
+
 class ProcessStripeWebhook extends ProcessStripeWebhookJob
 {
     public function handle()
     {
         $webhook = $this->webhookCall;
         $payload = $webhook->payload;
-        Log::info('PROCESS STRIPE WEBHOOK JOB STARTED', [
-            'id' => $this->webhookCall->id,
-            'type' => $this->webhookCall->payload['type'] ?? null,
-        ]);
-        Log::info("JOB PAYLOAD DEBUG", [
-            'payload' => $payload
-        ]);
 
         $eventType = $payload['type'] ?? null;
+        $isThinEvent = ($payload['object'] ?? null) === 'v2.core.event';
 
-// Classic Stripe event (sandbox)
+        /*
+        |--------------------------------------------------------------------------
+        | 1. Log the complete incoming Stripe event
+        |--------------------------------------------------------------------------
+        */
+
+        Log::info('STRIPE WEBHOOK - COMPLETE RAW JSON', [
+            'webhook_id' => $webhook->id,
+            'json' => json_encode(
+                $payload,
+                JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR
+            ),
+        ]);
+
+        Log::info('PROCESS STRIPE WEBHOOK JOB STARTED', [
+            'webhook_id' => $webhook->id,
+            'event_id' => $payload['id'] ?? null,
+            'event_type' => $eventType,
+            'event_format' => $isThinEvent ? 'thin' : 'snapshot',
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | 2. Get the Stripe object
+        |--------------------------------------------------------------------------
+        |
+        | Snapshot:
+        |   $payload['data']['object']
+        |
+        | Thin:
+        |   Retrieve the object using related_object.id
+        |
+        */
+
         $object = $payload['data']['object'] ?? null;
 
-// Stripe thin event (live)
-        if (
-            !$object &&
-            ($payload['object'] ?? null) === 'v2.core.event'
-        ) {
-            $object = $payload['related_object'] ?? [];
+        if ($isThinEvent) {
+
+            $relatedObject = $payload['related_object'] ?? [];
+
+            $resourceId = $relatedObject['id'] ?? null;
+            $resourceType = $relatedObject['type'] ?? null;
+
+            if (!$resourceId) {
+                Log::error('STRIPE THIN EVENT - MISSING RESOURCE ID', [
+                    'payload' => $payload,
+                ]);
+
+                throw new \RuntimeException(
+                    'Stripe thin event is missing related_object.id'
+                );
+            }
+
+            Stripe::setApiKey(config('services.stripe.secret'));
+
+            Log::info('STRIPE THIN EVENT - RETRIEVING RESOURCE', [
+                'resource_id' => $resourceId,
+                'resource_type' => $resourceType,
+            ]);
+
+            try {
+
+                switch ($resourceType) {
+
+                    case 'checkout.session':
+                        $object = Session::retrieve($resourceId)->toArray();
+                        break;
+
+                    case 'charge':
+                        $object = Charge::retrieve($resourceId)->toArray();
+                        break;
+
+                    case 'payment_intent':
+                        $object = PaymentIntent::retrieve($resourceId)->toArray();
+                        break;
+
+                    default:
+                        $object = $relatedObject;
+
+                        Log::warning('UNSUPPORTED THIN EVENT RESOURCE', [
+                            'resource_type' => $resourceType,
+                            'resource_id' => $resourceId,
+                        ]);
+                }
+
+            } catch (\Throwable $e) {
+
+                Log::error('STRIPE RESOURCE RETRIEVAL FAILED', [
+                    'resource_id' => $resourceId,
+                    'resource_type' => $resourceType,
+                    'message' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                ]);
+
+                // Allow Laravel's queue to retry the job.
+                throw $e;
+            }
         }
 
-        Log::info('STRIPE OBJECT DEBUG', [
+        /*
+        |--------------------------------------------------------------------------
+        | 3. Log the complete retrieved Stripe object
+        |--------------------------------------------------------------------------
+        */
+
+        Log::info('STRIPE COMPLETE OBJECT JSON', [
             'event_type' => $eventType,
-            'object' => $object,
+            'json' => json_encode(
+                $object,
+                JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR
+            ),
         ]);
 
-        // 🔥 LOG: Webhook received
-        Log::channel('single')->info("🔥 Stripe Webhook Received", [
-            'event_type' => $eventType,
-            'payload_id' => $payload['id'] ?? null,
-        ]);
+        /*
+        |--------------------------------------------------------------------------
+        | 4. Build the initial processed payload
+        |--------------------------------------------------------------------------
+        */
 
-        // Build a clean record layout
         $processed = [
             'event_id' => $payload['id'] ?? null,
             'event_type' => $eventType,
+            'event_format' => $isThinEvent ? 'thin' : 'snapshot',
 
             'object_type' => $object['object'] ?? null,
 
@@ -95,221 +172,298 @@ class ProcessStripeWebhook extends ProcessStripeWebhookJob
             'raw' => $payload,
         ];
 
-        $webhook->processed_payload = $processed;
-        $webhook->exception = null;
-        $webhook->save();
+        /*
+        |--------------------------------------------------------------------------
+        | 5. Process event types
+        |--------------------------------------------------------------------------
+        */
 
-        // 🔥 LOG: Payload saved
-        Log::channel('single')->info("💾 Webhook saved to DB", [
-            'webhook_id' => $webhook->id,
-        ]);
-
-        // Process webhook application logic
         switch ($eventType) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | PAYMENT INTENT
+            |--------------------------------------------------------------------------
+            */
 
             case 'payment_intent.succeeded':
             case 'v1.payment_intent.succeeded':
-                Log::info("⚡ payment_intent.succeeded fired");
+
+                Log::info('PAYMENT INTENT SUCCEEDED', [
+                    'object' => $object,
+                ]);
+
                 break;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CHECKOUT SESSION COMPLETED
+            |--------------------------------------------------------------------------
+            */
 
             case 'checkout.session.completed':
             case 'v1.checkout.session.completed':
 
-                Log::info('CHECKOUT CASE REACHED', [
+                Log::info('CHECKOUT SESSION COMPLETED', [
                     'event_type' => $eventType,
-                    'webhook_id' => $webhook->id,
+                    'event_format' => $isThinEvent ? 'thin' : 'snapshot',
                 ]);
 
-                if (($payload['object'] ?? null) === 'v2.core.event') {
+                $sessionId = $object['id'] ?? null;
 
-                    Log::info('STRIPE CONFIG CHECK', [
-                        'has_key' => !empty(config('services.stripe.secret')),
-                    ]);
+                if (!$sessionId) {
+                    throw new \RuntimeException(
+                        'Checkout Session ID is missing'
+                    );
+                }
+
+                /*
+                | Retrieve purchased products for BOTH event formats.
+                */
+
+                try {
 
                     Stripe::setApiKey(config('services.stripe.secret'));
 
-                    $sessionId = $payload['related_object']['id'] ?? null;
+                    $lineItems = Session::allLineItems(
+                        $sessionId,
+                        ['limit' => 100]
+                    )->toArray();
 
-                    if (!$sessionId) {
+                } catch (\Throwable $e) {
 
-                        Log::error('No checkout session ID found', [
-                            'payload' => $payload,
-                        ]);
+                    Log::error('CHECKOUT LINE ITEMS RETRIEVAL FAILED', [
+                        'session_id' => $sessionId,
+                        'message' => $e->getMessage(),
+                    ]);
 
-                        break;
-                    }
-
-                    try {
-
-                        Log::info('FETCHING CHECKOUT SESSION', [
-                            'session_id' => $sessionId,
-                        ]);
-
-                        $session = Session::retrieve($sessionId);
-
-                        $session = $session->toArray();
-
-                        // Retrieve purchased products / line items
-                        $lineItems = Session::allLineItems(
-                            $sessionId,
-                            ['limit' => 100]
-                        );
-
-                        $lineItems = $lineItems->toArray();
-
-                        Log::info('STRIPE CHECKOUT LINE ITEMS', [
-                            'session_id' => $sessionId,
-                            'items' => $lineItems['data'] ?? [],
-                        ]);
-
-                        Log::info('CHECKOUT SESSION STRUCTURE', [
-                            'keys' => array_keys($session),
-                        ]);
-
-                        Log::info('FULL STRIPE SESSION RETRIEVED', [
-                            'session_id' => $session['id'] ?? null,
-                            'email' => $session['customer_details']['email'] ?? null,
-                        ]);
-
-                        $object = $session;
-
-                        Log::info('SAVING FULL SESSION TO DB', [
-                            'session_id' => $session['id'] ?? null,
-                        ]);
-
-                        $processed = [
-                            'event_id' => $payload['id'] ?? null,
-                            'event_type' => $eventType,
-                            'object_type' => 'checkout.session',
-
-                            'amount' => $session['amount_total'] ?? null,
-                            'currency' => $session['currency'] ?? null,
-
-                            'customer' => $session['customer'] ?? null,
-                            'customer_details' => $session['customer_details'] ?? [],
-
-                            'payment_intent' => $session['payment_intent'] ?? null,
-
-                            'status' => $session['payment_status'] ?? null,
-
-                            'metadata' => $session['metadata'] ?? [],
-
-                            // Full Checkout Session
-                            'object' => $session,
-
-                            // Purchased products
-                            'line_items' => $lineItems['data'] ?? [],
-
-                            // Original webhook
-                            'raw' => $payload,
-                        ];
-
-                        $webhook->processed_payload = $processed;
-                        $webhook->save();
-
-                    } catch (\Throwable $e) {
-
-                        Log::error('Failed retrieving Stripe session', [
-                            'message' => $e->getMessage(),
-                            'session_id' => $sessionId,
-                            'line' => $e->getLine(),
-                            'file' => $e->getFile(),
-                        ]);
-
-                        break;
-                    }
+                    throw $e;
                 }
 
-                $orderId = $object['id'] ?? null;
+                /*
+                | Build complete Checkout Session record.
+                */
 
-                $total = $object['amount_total']
-                    ?? $object['amount']
-                    ?? null;
+                $processed = [
+                    'event_id' => $payload['id'] ?? null,
+                    'event_type' => $eventType,
+                    'event_format' => $isThinEvent ? 'thin' : 'snapshot',
 
-                $customerDetails = $object['customer_details'] ?? [];
+                    'object_type' => 'checkout.session',
 
-                $customerEmail = $customerDetails['email'] ?? null;
+                    'amount' => $object['amount_total'] ?? null,
 
-                $customerName = $customerDetails['name']
-                    ?? 'Flow State Customer';
+                    'currency' => $object['currency'] ?? null,
 
-                $webhook->gross = $total;
+                    'customer' => $object['customer'] ?? null,
+
+                    'customer_details' => $object['customer_details'] ?? [],
+
+                    'payment_intent' => $object['payment_intent'] ?? null,
+
+                    'status' => $object['payment_status'] ?? null,
+
+                    'metadata' => $object['metadata'] ?? [],
+
+                    // Complete Checkout Session
+                    'object' => $object,
+
+                    // Purchased products
+                    'line_items' => $lineItems['data'] ?? [],
+
+                    // Original Stripe webhook JSON
+                    'raw' => $payload,
+                ];
+
+                /*
+                | Log the COMPLETE processed JSON.
+                */
+
+                Log::info('STRIPE CHECKOUT - FULL JSON DUMP', [
+                    'json' => json_encode(
+                        $processed,
+                        JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR
+                    ),
+                ]);
+
+                /*
+                | Save complete information to database.
+                */
+
+                $webhook->processed_payload = $processed;
+
+                $webhook->gross = $object['amount_total'] ?? null;
                 $webhook->fee = null;
                 $webhook->net = null;
 
+                $webhook->exception = null;
+
                 $webhook->save();
 
-                Log::info('Customer Info', [
-                    'email' => $customerEmail,
-                    'name' => $customerName,
-                    'order_id' => $orderId,
-                    'total' => $total,
+                /*
+                | Customer information.
+                */
+
+                $customerDetails = $object['customer_details'] ?? [];
+
+                Log::info('STRIPE CHECKOUT CUSTOMER INFORMATION', [
+                    'session_id' => $sessionId,
+                    'email' => $customerDetails['email'] ?? null,
+                    'name' => $customerDetails['name'] ?? null,
+                    'total' => $object['amount_total'] ?? null,
+                    'currency' => $object['currency'] ?? null,
+                    'line_items' => $lineItems['data'] ?? [],
                 ]);
 
                 break;
 
 
-
-
-                break;
+            /*
+            |--------------------------------------------------------------------------
+            | PAYOUT EVENTS
+            |--------------------------------------------------------------------------
+            */
 
             case 'payout.created':
-                Log::info("💰 payout.created — funds pending");
 
-                // 🧠 FIX: Explicit assignment to bypass Mass Assignment block
+                Log::info('PAYOUT CREATED');
+
                 $webhook->payout_status = 'pending';
                 $webhook->payout_at = null;
                 $webhook->save();
+
                 break;
 
+
             case 'payout.paid':
-                Log::info("🏦 payout.paid — funds deposited to bank");
+
+                Log::info('PAYOUT PAID');
 
                 $arrival = $object['arrival_date'] ?? null;
 
-                // 🧠 FIX: Explicit assignment to bypass Mass Assignment block
                 $webhook->payout_status = 'paid';
-                $webhook->payout_at = $arrival ? Carbon::createFromTimestamp($arrival) : now();
+
+                $webhook->payout_at = $arrival
+                    ? Carbon::createFromTimestamp($arrival)
+                    : now();
+
                 $webhook->save();
+
                 break;
 
-            case 'payout.failed':
-                Log::warning("❌ payout.failed — payout failed");
 
-                // 🧠 FIX: Explicit assignment to bypass Mass Assignment block
+            case 'payout.failed':
+
+                Log::warning('PAYOUT FAILED');
+
                 $webhook->payout_status = 'failed';
                 $webhook->payout_at = null;
                 $webhook->save();
+
                 break;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CHARGE SUCCEEDED
+            |--------------------------------------------------------------------------
+            */
+
             case 'charge.succeeded':
             case 'v1.charge.succeeded':
 
-                Log::info('💳 charge.succeeded fired');
+                Log::info('CHARGE SUCCEEDED', [
+                    'charge' => $object,
+                ]);
 
-                $charge = $object;
-
-                $webhook->gross = $charge['amount'] ?? null;
+                $webhook->gross = $object['amount'] ?? null;
 
                 $webhook->card_brand =
-                    $charge['payment_method_details']['card']['brand']
+                    $object['payment_method_details']['card']['brand']
                     ?? null;
 
                 $webhook->last4 =
-                    $charge['payment_method_details']['card']['last4']
+                    $object['payment_method_details']['card']['last4']
                     ?? null;
 
                 $webhook->receipt_url =
-                    $charge['receipt_url']
+                    $object['receipt_url']
                     ?? null;
 
                 $webhook->save();
 
                 break;
 
-            default:
-                Log::warning("⚠️ Unhandled Stripe event type", [
-                    'event_type' => $eventType,
+
+            /*
+            |--------------------------------------------------------------------------
+            | REFUNDS
+            |--------------------------------------------------------------------------
+            */
+
+            case 'charge.refunded':
+            case 'v1.charge.refunded':
+
+                Log::info('CHARGE REFUNDED', [
+                    'charge' => $object,
                 ]);
+
+                break;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | DISPUTES
+            |--------------------------------------------------------------------------
+            */
+
+            case 'charge.dispute.created':
+            case 'v1.charge.dispute.created':
+
+                Log::warning('CHARGE DISPUTE CREATED', [
+                    'object' => $object,
+                ]);
+
+                break;
+
+
+            case 'charge.dispute.closed':
+            case 'v1.charge.dispute.closed':
+
+                Log::info('CHARGE DISPUTE CLOSED', [
+                    'object' => $object,
+                ]);
+
+                break;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | UNHANDLED EVENTS
+            |--------------------------------------------------------------------------
+            */
+
+            default:
+
+                Log::warning('UNHANDLED STRIPE EVENT', [
+                    'event_type' => $eventType,
+                    'event_format' => $isThinEvent ? 'thin' : 'snapshot',
+                    'object' => $object,
+                ]);
+
+                break;
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | 6. Confirm job completed
+        |--------------------------------------------------------------------------
+        */
+
+        Log::info('STRIPE WEBHOOK JOB COMPLETED', [
+            'webhook_id' => $webhook->id,
+            'event_type' => $eventType,
+        ]);
     }
 }
