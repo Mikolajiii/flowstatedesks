@@ -5,8 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 use Stripe\Exception\ApiErrorException;
 use Stripe\Stripe;
+use Stripe\Charge;
+use Stripe\Payout;
+use Stripe\BalanceTransaction;
+use Throwable;
 
 class StripeDashboardController extends Controller
 {
@@ -18,7 +23,8 @@ class StripeDashboardController extends Controller
     private const TRANSACTION_EVENT_TYPES = [
         'payout.paid',
         'payout.created',
-        'balance.available',
+        'payout.failed',
+        'payout.canceled',
 
         'charge.refunded',
         'v1.charge.refunded',
@@ -28,9 +34,6 @@ class StripeDashboardController extends Controller
 
         'charge.succeeded',
         'v1.charge.succeeded',
-
-        'checkout.session.completed',
-        'v1.checkout.session.completed',
     ];
 
     private const PER_PAGE = 25;
@@ -50,26 +53,18 @@ class StripeDashboardController extends Controller
 
         foreach ($orders as $order) {
 
-            // Get the processed webhook structure
             $processed = $this->processedPayload($order);
-
-            // Get the actual Stripe Checkout Session
             $obj = $this->stripeObject($order);
 
             $metadata = $obj['metadata'] ?? [];
 
-            // Product information
             $order->product = $metadata['product'] ?? null;
-
             $order->description = $metadata['description'] ?? null;
-
             $order->price_id = $metadata['price_id'] ?? null;
 
-
-            // Cart items - retrieved from Stripe Checkout
+            // Cart items
             $items = $processed['line_items'] ?? [];
 
-            // Fallback for older webhook records
             if (empty($items) && !empty($metadata['items'])) {
 
                 $items = is_string($metadata['items'])
@@ -77,10 +72,7 @@ class StripeDashboardController extends Controller
                     : $metadata['items'];
             }
 
-            $order->items = is_array($items)
-                ? $items
-                : [];
-
+            $order->items = is_array($items) ? $items : [];
 
             // Customer information
             $customerDetails = $obj['customer_details'] ?? [];
@@ -98,32 +90,24 @@ class StripeDashboardController extends Controller
                 $obj['receipt_email'] ?? null
             );
 
-
-            // Amount (Stripe stores amounts in cents)
+            // Amount in cents
             $order->amount = $obj['amount_total']
                 ?? $obj['amount']
                 ?? $processed['amount']
                 ?? null;
 
-
-            // Currency
             $order->currency = strtoupper(
                 $obj['currency']
                 ?? $processed['currency']
                 ?? ''
             );
 
-
-            // Payment status
             $order->status = $obj['payment_status']
                 ?? $obj['status']
                 ?? $processed['status']
                 ?? null;
 
-
-            // Additional useful identifiers
             $order->stripe_session_id = $obj['id'] ?? null;
-
             $order->payment_intent = $obj['payment_intent'] ?? null;
         }
 
@@ -153,37 +137,35 @@ class StripeDashboardController extends Controller
 
     public function transactions()
     {
-        $transactions = $this->webhookCallsOfType(self::TRANSACTION_EVENT_TYPES)
+        $transactions = $this->webhookCallsOfType(
+            self::TRANSACTION_EVENT_TYPES
+        )
+            ->orderBy('created_at', 'desc')
             ->orderBy('id', 'desc')
             ->paginate(self::PER_PAGE);
 
         foreach ($transactions as $txn) {
 
             $processed = $this->processedPayload($txn);
-
             $obj = $this->stripeObject($txn);
-
 
             // Customer information
             $txn->buyer_name = $this->firstFilled(
                 $obj['billing_details']['name'] ?? null,
-                $obj['shipping']['name'] ?? null,
-                $obj['customer_details']['name'] ?? null
+                $obj['customer_details']['name'] ?? null,
+                $obj['shipping']['name'] ?? null
             );
 
             $txn->buyer_email = $this->firstFilled(
                 $obj['billing_details']['email'] ?? null,
-                $obj['receipt_email'] ?? null,
-                $obj['customer_details']['email'] ?? null
+                $obj['customer_details']['email'] ?? null,
+                $obj['receipt_email'] ?? null
             );
-
 
             // Transaction status
             $txn->display_status = match ($obj['object'] ?? null) {
 
-                'checkout.session' => $obj['payment_status'] ?? null,
-
-                'charge' => $obj['status'] ?? null,
+                'charge' => $this->chargeDisplayStatus($obj),
 
                 'payment_intent' => $obj['status'] ?? null,
 
@@ -191,7 +173,6 @@ class StripeDashboardController extends Controller
 
                 default => $processed['status'] ?? null,
             };
-
 
             // Amount and currency
             $txn->display_amount = $obj['amount_total']
@@ -252,22 +233,88 @@ class StripeDashboardController extends Controller
 
         try {
 
-            foreach (\Stripe\Charge::all(['limit' => 20])->data as $charge) {
+            $createdAfter = strtotime('-30 days');
 
-                $this->storeStripeEvent('charge.succeeded', $charge);
-            }
+            /*
+             * Import charges.
+             *
+             * Pagination ensures we don't stop at the first 100.
+             */
+
+            $params = [
+                'limit' => 100,
+                'created' => [
+                    'gte' => $createdAfter,
+                ],
+            ];
+
+            do {
+
+                $charges = Charge::all($params);
+
+                foreach ($charges->data as $charge) {
+
+                    $type = ($charge->amount_refunded ?? 0) > 0
+                        ? 'charge.refunded'
+                        : 'charge.succeeded';
+
+                    $this->storeStripeEvent($type, $charge);
+                }
+
+                $lastCharge = end($charges->data);
+
+                $hasMore = $charges->has_more && $lastCharge;
+
+                if ($hasMore) {
+                    $params['starting_after'] = $lastCharge->id;
+                }
+
+            } while ($hasMore);
 
 
-            foreach (\Stripe\Payout::all(['limit' => 20])->data as $payout) {
+            /*
+             * Import payouts.
+             */
 
-                $this->storeStripeEvent('payout.paid', $payout);
-            }
+            $params = [
+                'limit' => 100,
+                'created' => [
+                    'gte' => $createdAfter,
+                ],
+            ];
 
+            do {
 
-            foreach (\Stripe\Refund::all(['limit' => 20])->data as $refund) {
+                $payouts = Payout::all($params);
 
-                $this->storeStripeEvent('charge.refunded', $refund);
-            }
+                foreach ($payouts->data as $payout) {
+
+                    $type = match ($payout->status ?? null) {
+
+                        'paid' => 'payout.paid',
+
+                        'pending', 'in_transit' => 'payout.created',
+
+                        'failed' => 'payout.failed',
+
+                        'canceled' => 'payout.canceled',
+
+                        default => 'payout.created',
+                    };
+
+                    $this->storeStripeEvent($type, $payout);
+                }
+
+                $lastPayout = end($payouts->data);
+
+                $hasMore = $payouts->has_more && $lastPayout;
+
+                if ($hasMore) {
+                    $params['starting_after'] = $lastPayout->id;
+                }
+
+            } while ($hasMore);
+
 
         } catch (ApiErrorException $e) {
 
@@ -278,6 +325,16 @@ class StripeDashboardController extends Controller
             return redirect()
                 ->route('admin.stripe.transactions')
                 ->with('error', 'Stripe sync failed: ' . $e->getMessage());
+
+        } catch (Throwable $e) {
+
+            Log::error('Stripe sync processing failed', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return redirect()
+                ->route('admin.stripe.transactions')
+                ->with('error', 'Stripe sync processing failed: ' . $e->getMessage());
         }
 
         return redirect()
@@ -288,17 +345,22 @@ class StripeDashboardController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | STORE STRIPE EVENTS
+    | STORE OR UPDATE STRIPE EVENT
     |--------------------------------------------------------------------------
+    |
+    | Important:
+    | Existing records are updated rather than skipped.
+    | This allows previously imported transactions to receive fee/net values.
+    |
     */
 
     protected function storeStripeEvent(string $type, $object): void
     {
-        if (
-            DB::table('webhook_calls')
-                ->where('stripe_id', $object->id)
-                ->exists()
-        ) {
+        $object = $object->toArray();
+
+        $stripeId = $object['id'] ?? null;
+
+        if (!$stripeId) {
             return;
         }
 
@@ -310,37 +372,51 @@ class StripeDashboardController extends Controller
         $last4 = null;
         $receiptUrl = null;
 
+        /*
+         * Charge information
+         */
 
         if (
-            $type === 'charge.succeeded'
-            && ($object->object ?? null) === 'charge'
+            in_array($type, ['charge.succeeded', 'charge.refunded'], true)
+            && ($object['object'] ?? null) === 'charge'
         ) {
 
-            $gross = $object->amount ?? null;
+            $gross = $object['amount'] ?? null;
 
-            $receiptUrl = $object->receipt_url ?? null;
+            $receiptUrl = $object['receipt_url'] ?? null;
 
-            $cardBrand = $object->payment_method_details->card->brand ?? null;
+            $cardBrand = $object['payment_method_details']['card']['brand']
+                ?? null;
 
-            $last4 = $object->payment_method_details->card->last4 ?? null;
+            $last4 = $object['payment_method_details']['card']['last4']
+                ?? null;
 
+            /*
+             * Retrieve actual Stripe processing fee and net amount.
+             */
 
-            if (!empty($object->balance_transaction)) {
+            $balanceTransactionId = $object['balance_transaction'] ?? null;
+
+            if (is_array($balanceTransactionId)) {
+                $balanceTransactionId = $balanceTransactionId['id'] ?? null;
+            }
+
+            if (!empty($balanceTransactionId)) {
 
                 try {
 
-                    $balanceTxn = \Stripe\BalanceTransaction::retrieve(
-                        $object->balance_transaction
+                    $balanceTxn = BalanceTransaction::retrieve(
+                        $balanceTransactionId
                     );
 
                     $fee = $balanceTxn->fee ?? null;
-
                     $net = $balanceTxn->net ?? null;
 
-                } catch (\Exception $e) {
+                } catch (Throwable $e) {
 
-                    Log::warning('Unable to retrieve balance transaction', [
-                        'charge_id' => $object->id,
+                    Log::warning('Unable to retrieve Stripe balance transaction', [
+                        'charge_id' => $stripeId,
+                        'balance_transaction_id' => $balanceTransactionId,
                         'error' => $e->getMessage(),
                     ]);
                 }
@@ -348,34 +424,87 @@ class StripeDashboardController extends Controller
         }
 
 
-        DB::table('webhook_calls')->insert([
+        /*
+         * Preserve Stripe's original creation date.
+         */
 
+        $createdAt = !empty($object['created'])
+            ? Carbon::createFromTimestamp($object['created'])
+            : now();
+
+
+        /*
+         * Save original Stripe object and event type.
+         */
+
+        $payload = [
+            'type' => $type,
+            'data' => [
+                'object' => $object,
+            ],
+        ];
+
+        $data = [
             'name' => $type,
-
-            'stripe_id' => $object->id,
-
             'gross' => $gross,
             'fee' => $fee,
             'net' => $net,
-
             'card_brand' => $cardBrand,
             'last4' => $last4,
             'receipt_url' => $receiptUrl,
-
-            'payload' => json_encode([
-                'type' => $type,
-                'data' => [
-                    'object' => $object,
-                ],
+            'payload' => json_encode($payload),
+            'processed_payload' => json_encode([
+                'object' => $object,
             ]),
-
-            'processed_payload' => json_encode([]),
-
             'headers' => json_encode([]),
-
-            'created_at' => now(),
             'updated_at' => now(),
-        ]);
+        ];
+
+
+        /*
+         * Update existing records or insert new ones.
+         */
+
+        $existing = DB::table('webhook_calls')
+            ->where('stripe_id', $stripeId)
+            ->first();
+
+        if ($existing) {
+
+            DB::table('webhook_calls')
+                ->where('id', $existing->id)
+                ->update($data);
+
+        } else {
+
+            $data['stripe_id'] = $stripeId;
+            $data['created_at'] = $createdAt;
+
+            DB::table('webhook_calls')->insert($data);
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CHARGE DISPLAY STATUS
+    |--------------------------------------------------------------------------
+    */
+
+    private function chargeDisplayStatus(array $obj): string
+    {
+        $amount = $obj['amount'] ?? 0;
+        $refunded = $obj['amount_refunded'] ?? 0;
+
+        if ($refunded > 0 && $refunded >= $amount) {
+            return 'refunded';
+        }
+
+        if ($refunded > 0) {
+            return 'partially_refunded';
+        }
+
+        return $obj['status'] ?? 'unknown';
     }
 
 
@@ -401,9 +530,6 @@ class StripeDashboardController extends Controller
     |--------------------------------------------------------------------------
     | PROCESSED PAYLOAD
     |--------------------------------------------------------------------------
-    |
-    | Handles JSON strings and already-decoded arrays.
-    |
     */
 
     private function processedPayload(object $row): array
@@ -449,32 +575,25 @@ class StripeDashboardController extends Controller
     |--------------------------------------------------------------------------
     | GET ACTUAL STRIPE OBJECT
     |--------------------------------------------------------------------------
-    |
-    | New structure:
-    | processed_payload['object']
-    |
-    | Older structure:
-    | processed_payload directly contains the session/object.
-    |
-    | Original webhook fallback:
-    | payload['data']['object']
-    |
     */
 
     private function stripeObject(object $row): array
     {
         $processed = $this->processedPayload($row);
 
-
         // New processed webhook structure
-        if (isset($processed['object']) && is_array($processed['object'])) {
-
+        if (
+            isset($processed['object'])
+            && is_array($processed['object'])
+        ) {
             return $processed['object'];
         }
 
-
-        // Older processed structure containing the original raw webhook
-        if (isset($processed['raw']) && is_array($processed['raw'])) {
+        // Older processed structure containing original raw webhook
+        if (
+            isset($processed['raw'])
+            && is_array($processed['raw'])
+        ) {
 
             $raw = $processed['raw'];
 
@@ -487,13 +606,10 @@ class StripeDashboardController extends Controller
             }
         }
 
-
-        // Older records where the full Checkout Session was saved directly
-        if (isset($processed['id']) && isset($processed['object'])) {
-
+        // Older records where the full Stripe object was saved directly
+        if (isset($processed['id'], $processed['object'])) {
             return $processed;
         }
-
 
         // Original webhook payload
         $payload = $row->payload ?? [];
@@ -506,20 +622,15 @@ class StripeDashboardController extends Controller
             return [];
         }
 
-
         // Classic Stripe event
         if (isset($payload['data']['object'])) {
-
             return $payload['data']['object'];
         }
 
-
-        // Stripe thin event
+        // Stripe Thin event
         if (isset($payload['related_object'])) {
-
             return $payload['related_object'];
         }
-
 
         return [];
     }
@@ -536,7 +647,6 @@ class StripeDashboardController extends Controller
         foreach ($values as $value) {
 
             if ($value !== null && $value !== '') {
-
                 return $value;
             }
         }
