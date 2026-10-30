@@ -635,7 +635,7 @@
                     <div class="flex items-center gap-4">
           <span class="text-xl font-semibold text-neutral-900">
             {{--  ${{ number_format($products['sidecar']['price'] / 100, 2) }}--}}
-            $2
+            $449.00
           </span>
 
                     </div>
