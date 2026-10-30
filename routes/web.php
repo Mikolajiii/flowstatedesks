@@ -3,6 +3,7 @@
 
 use App\Http\Controllers\Admin\StripeDashboardController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\WelcomeController;
 use Spatie\WebhookClient\Http\Controllers\WebhookController;
 use App\Http\Controllers\CheckoutController;
 //use App\Http\Controllers\StripeWebhookController;
@@ -11,19 +12,17 @@ use App\Services\SendGridService;
 
 
 
-/*
+
 Route::get('/welcome', [WelcomeController::class, 'welcome']);
-
-
 
 Route::get('/', [WelcomeController::class, 'welcome'])->name('home');
 
-*/
 
 
 
 
-Route::get('/', function () {
+
+/* Route::get('/', function () {
     return view('welcome');
 });
 
@@ -31,7 +30,7 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-
+*/
 Route::view('/terms', 'terms')->name('terms');
 Route::view('/shipping', 'shipping')->name('shipping');
 Route::view('/faq', 'FAQ')->name('faq');
