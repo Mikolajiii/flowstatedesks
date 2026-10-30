@@ -15,7 +15,7 @@ return [
 
     'sidecar' => [
         'name'  => 'FlowState Sidecar',
-        'price' => 44900,
+        'price' => 200,
         'image' => '/product_photos/flowstate_sidecar/1_RACK_EDITED.webp',
     ],
 ];
