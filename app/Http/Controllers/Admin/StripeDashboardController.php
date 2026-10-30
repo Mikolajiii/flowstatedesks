@@ -44,9 +44,7 @@ class StripeDashboardController extends Controller
         foreach ($orders as $order) {
 
             $obj = $this->stripeObject($order);
-            if ($order->id == 424) {
-                dd($obj);
-            }
+
 
             $metadata = $obj['metadata'] ?? [];
 
