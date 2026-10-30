@@ -5,6 +5,7 @@ namespace App\Jobs;
 use Spatie\StripeWebhooks\ProcessStripeWebhookJob;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Stripe\BalanceTransaction;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
 use Stripe\Charge;
@@ -371,7 +372,7 @@ class ProcessStripeWebhook extends ProcessStripeWebhookJob
             */
 
             case 'charge.succeeded':
-            case 'v1.charge.succeeded':
+            case 'charge.succeeded':
 
                 Log::info('CHARGE SUCCEEDED', [
                     'charge' => $object,
@@ -391,23 +392,40 @@ class ProcessStripeWebhook extends ProcessStripeWebhookJob
                     $object['receipt_url']
                     ?? null;
 
+                // Retrieve Stripe Balance Transaction
+                $balanceTransactionId = $object['balance_transaction'] ?? null;
+
+                if ($balanceTransactionId) {
+
+                    try {
+
+                        $balanceTransaction = BalanceTransaction::retrieve(
+                            $balanceTransactionId
+                        );
+
+                        $webhook->fee = $balanceTransaction->fee;
+                        $webhook->net = $balanceTransaction->net;
+
+                        Log::info('STRIPE BALANCE TRANSACTION', [
+                            'balance_transaction_id' => $balanceTransactionId,
+                            'gross' => $balanceTransaction->amount,
+                            'fee' => $balanceTransaction->fee,
+                            'net' => $balanceTransaction->net,
+                            'currency' => $balanceTransaction->currency,
+                        ]);
+
+                    } catch (\Throwable $e) {
+
+                        Log::error('BALANCE TRANSACTION RETRIEVAL FAILED', [
+                            'charge_id' => $object['id'] ?? null,
+                            'message' => $e->getMessage(),
+                        ]);
+
+                        throw $e;
+                    }
+                }
+
                 $webhook->save();
-
-                break;
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | REFUNDS
-            |--------------------------------------------------------------------------
-            */
-
-            case 'charge.refunded':
-            case 'v1.charge.refunded':
-
-                Log::info('CHARGE REFUNDED', [
-                    'charge' => $object,
-                ]);
 
                 break;
 
