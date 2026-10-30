@@ -160,9 +160,7 @@
         </pre>
     </div>
 
-    @php
-        use Illuminate\Support\Js;
-    @endphp
+
 
     <pre class="bg-gray-100 p-4 rounded text-sm overflow-auto">
 {{ json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}
