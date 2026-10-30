@@ -3,18 +3,21 @@
 
 use App\Http\Controllers\Admin\StripeDashboardController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\Controller;
 use Spatie\WebhookClient\Http\Controllers\WebhookController;
 use App\Http\Controllers\CheckoutController;
 //use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 use App\Services\SendGridService;
-Route::get('/', function () {
-    return view('welcome');
-});
+use App\Http\Controllers\WelcomeController;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+
+
+
+
+Route::get('/welcome', [WelcomeController::class, 'welcome']);
+
+Route::get('/', [WelcomeController::class, 'welcome'])->name('home');
 
 
 Route::view('/terms', 'terms')->name('terms');
@@ -66,8 +69,6 @@ Route::post('/cart/update', [CartController::class, 'update'])->name('cart.updat
 Route::post('/cart/remove/{product}', [CartController::class, 'remove'])->name('cart.remove');
 Route::get('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
 
-Route::get('/admin/stripe/transactions/sync', [StripeDashboardController::class, 'sync'])
-    ->name('admin.stripe.transactions.sync');
 
 
 /*Route::stripeWebhooks('stripe/webhook')
@@ -79,8 +80,6 @@ Route::get('/admin/stripe/transactions/sync', [StripeDashboardController::class,
 Route::stripeWebhooks('stripe/webhook');
 
 
-//Route::webhooks('stripe/webhook', 'stripe')
-//    ->withoutMiddleware(['web', 'csrf']);
 
 
 
@@ -131,6 +130,7 @@ Route::prefix('admin/stripe')->group(function () {
     Route::get('/orders', [StripeDashboardController::class, 'orders'])->name('admin.stripe.orders');
     Route::get('/orders/{id}', [StripeDashboardController::class, 'orderShow'])->name('admin.stripe.orders.show');
 
+    Route::get('/transactions/sync', [StripeDashboardController::class, 'sync'])->name('admin.stripe.transactions.sync');
     Route::get('/transactions', [StripeDashboardController::class, 'transactions'])->name('admin.stripe.transactions');
     Route::get('/transactions/{id}', [StripeDashboardController::class, 'transactionShow'])->name('admin.stripe.transactions.show');
 });

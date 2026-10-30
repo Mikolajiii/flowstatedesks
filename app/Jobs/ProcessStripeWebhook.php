@@ -67,21 +67,34 @@ class ProcessStripeWebhook extends ProcessStripeWebhookJob
         $processed = [
             'event_id' => $payload['id'] ?? null,
             'event_type' => $eventType,
+
             'object_type' => $object['object'] ?? null,
 
-            // 🧠 Fix: Fallback to checkout session properties if payment intent keys are missing
-            'amount' => $object['amount'] ?? $object['amount_total'] ?? null,
+            'amount' => $object['amount_total']
+                ?? $object['amount']
+                    ?? null,
+
             'currency' => $object['currency'] ?? null,
+
             'customer' => $object['customer'] ?? null,
+
+            'customer_details' => $object['customer_details'] ?? [],
+
             'payment_intent' => $object['payment_intent'] ?? null,
+
             'charge' => $object['charge'] ?? null,
-            'status' => $object['status'] ?? $object['payment_status'] ?? null,
+
+            'status' => $object['payment_status']
+                ?? $object['status']
+                    ?? null,
 
             'metadata' => $object['metadata'] ?? [],
+
+            'object' => $object,
+
             'raw' => $payload,
         ];
 
-        // 🧠 FIX: Bypass Mass Assignment restrictions by updating properties directly
         $webhook->processed_payload = $processed;
         $webhook->exception = null;
         $webhook->save();
@@ -136,6 +149,19 @@ class ProcessStripeWebhook extends ProcessStripeWebhookJob
 
                         $session = $session->toArray();
 
+                        // Retrieve purchased products / line items
+                        $lineItems = Session::allLineItems(
+                            $sessionId,
+                            ['limit' => 100]
+                        );
+
+                        $lineItems = $lineItems->toArray();
+
+                        Log::info('STRIPE CHECKOUT LINE ITEMS', [
+                            'session_id' => $sessionId,
+                            'items' => $lineItems['data'] ?? [],
+                        ]);
+
                         Log::info('CHECKOUT SESSION STRUCTURE', [
                             'keys' => array_keys($session),
                         ]);
@@ -151,7 +177,34 @@ class ProcessStripeWebhook extends ProcessStripeWebhookJob
                             'session_id' => $session['id'] ?? null,
                         ]);
 
-                        $webhook->processed_payload = $session;
+                        $processed = [
+                            'event_id' => $payload['id'] ?? null,
+                            'event_type' => $eventType,
+                            'object_type' => 'checkout.session',
+
+                            'amount' => $session['amount_total'] ?? null,
+                            'currency' => $session['currency'] ?? null,
+
+                            'customer' => $session['customer'] ?? null,
+                            'customer_details' => $session['customer_details'] ?? [],
+
+                            'payment_intent' => $session['payment_intent'] ?? null,
+
+                            'status' => $session['payment_status'] ?? null,
+
+                            'metadata' => $session['metadata'] ?? [],
+
+                            // Full Checkout Session
+                            'object' => $session,
+
+                            // Purchased products
+                            'line_items' => $lineItems['data'] ?? [],
+
+                            // Original webhook
+                            'raw' => $payload,
+                        ];
+
+                        $webhook->processed_payload = $processed;
                         $webhook->save();
 
                     } catch (\Throwable $e) {
