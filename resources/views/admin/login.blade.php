@@ -1,3 +1,10 @@
+@if ($errors->has('password'))
+    <div style="color:red;">
+        {{ $errors->first('password') }}
+    </div>
+@endif
+
+
 <form method="POST" action="{{ route('admin.login.submit') }}">
     @csrf
 

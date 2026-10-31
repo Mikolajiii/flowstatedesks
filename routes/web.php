@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\StripeDashboardController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\WelcomeController;
@@ -131,21 +132,44 @@ Route::post('/admin/login', function (\Illuminate\Http\Request $request) {
 
 
 
-Route::middleware('admin.password')->group(function () {
-//stripe  admin routes
-Route::get('/admin/stripe', function () {
-    return view('admin.stripe.dashboard');
-})->name('admin.stripe.dashboard');
+// Admin Stripe Routes
+Route::prefix('admin/stripe')
+    ->middleware('admin.password')
+    ->group(function () {
 
-Route::prefix('admin/stripe')->group(function () {
-    Route::get('/orders', [StripeDashboardController::class, 'orders'])->name('admin.stripe.orders');
-    Route::get('/orders/{id}', [StripeDashboardController::class, 'orderShow'])->name('admin.stripe.orders.show');
+        Route::get('/', function () {
+            return view('admin.stripe.dashboard');
+        })->name('admin.stripe.dashboard');
 
-    Route::get('/transactions/sync', [StripeDashboardController::class, 'sync'])->name('admin.stripe.transactions.sync');
-    Route::get('/transactions', [StripeDashboardController::class, 'transactions'])->name('admin.stripe.transactions');
-    Route::get('/transactions/{id}', [StripeDashboardController::class, 'transactionShow'])->name('admin.stripe.transactions.show');
-});
-});
+        Route::get('/orders', [StripeDashboardController::class, 'orders'])
+            ->name('admin.stripe.orders');
+
+        Route::get('/orders/{id}', [StripeDashboardController::class, 'orderShow'])
+            ->name('admin.stripe.orders.show');
+
+        Route::get('/transactions/sync', [StripeDashboardController::class, 'sync'])
+            ->name('admin.stripe.transactions.sync');
+
+        Route::get('/transactions', [StripeDashboardController::class, 'transactions'])
+            ->name('admin.stripe.transactions');
+
+        Route::get('/transactions/{id}', [StripeDashboardController::class, 'transactionShow'])
+            ->name('admin.stripe.transactions.show');
+    });
+
+Route::get('/admin/login', [AdminAuthController::class, 'showLogin'])
+    ->name('admin.login');
+
+Route::post('/admin/login', [AdminAuthController::class, 'login'])
+    ->name('admin.login.submit');
+
+Route::get('/admin/logout', [AdminAuthController::class, 'logout'])
+    ->name('admin.logout');
+
+
+
+
+
 //cart routes
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::get('/cart', [CartController::class, 'view'])->name('cart.view');
