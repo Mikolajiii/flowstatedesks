@@ -59,6 +59,7 @@
                     font-semibold
                     tracking-wide
                     lg:order-1
+                    lg:ml-14
                 "
                     >
                         <a href="#FlowState_Pro"
