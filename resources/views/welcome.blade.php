@@ -357,7 +357,7 @@
     <img
         src="https://flagcdn.com/w20/ca.png"
         alt="Canada"
-        class="w-5 h-4 mr-2 flex-shrink-0 rounded-sm"
+        class="w-8 h-4 mr-2 flex-shrink-0 rounded-sm"
     >
     In stock — Free Shipping
 </span>
@@ -538,7 +538,7 @@
     <img
         src="https://flagcdn.com/w20/ca.png"
         alt="Canada"
-        class="w-5 h-4 mr-2 flex-shrink-0 rounded-sm"
+        class="w-8 h-4 mr-2 flex-shrink-0 rounded-sm"
     >
     In stock — Free Shipping
 </span>
@@ -728,7 +728,7 @@
     <img
         src="https://flagcdn.com/w20/ca.png"
         alt="Canada"
-        class="w-5 h-4 mr-2 flex-shrink-0 rounded-sm"
+        class="w-8 h-4 mr-2 flex-shrink-0 rounded-sm"
     >
     In stock — Free Shipping
 </span>
