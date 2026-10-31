@@ -353,8 +353,12 @@
                                         View Cart
                                     </button>
                                 </div>
-                                    <span class="mt-3 inline-flex items-center justify-center  text-purple-500
-             text-md font-medium px-2 py-0.5 rounded-full">
+                                <span class="mt-3 inline-flex items-center justify-center text-purple-500 text-md font-medium px-2 py-0.5 rounded-full">
+    <img
+        src="https://flagcdn.com/w20/ca.png"
+        alt="Canada"
+        class="w-8 h-4 mr-2 rounded-sm"
+    >
     In stock — Free Shipping
 </span>
                                 </div>
@@ -530,8 +534,12 @@
                                         View Cart
                                     </button>
                                 </div>
-                                    <span class="mt-3 inline-flex items-center justify-center  text-purple-500
-             text-md font-medium px-2 py-0.5 rounded-full">
+                                <span class="mt-3 inline-flex items-center justify-center text-purple-500 text-md font-medium px-2 py-0.5 rounded-full">
+    <img
+        src="https://flagcdn.com/w20/ca.png"
+        alt="Canada"
+        class="w-8 h-4 mr-2 rounded-sm"
+    >
     In stock — Free Shipping
 </span>
                                 </div>
@@ -716,8 +724,12 @@
                                         View Cart
                                     </button>
                                 </div>
-                                    <span class="mt-3 inline-flex items-center justify-center  text-purple-500
-             text-md font-medium px-2 py-0.5 rounded-full">
+                                <span class="mt-3 inline-flex items-center justify-center text-purple-500 text-md font-medium px-2 py-0.5 rounded-full">
+    <img
+        src="https://flagcdn.com/w20/ca.png"
+        alt="Canada"
+        class="w-8 h-4 mr-2 rounded-sm"
+    >
     In stock — Free Shipping
 </span>
                                 </div>
