@@ -14,7 +14,7 @@ class AdminAuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if ($request->password !== env('ADMIN_PASSWORD')) {
+        if ($request->password !== config('admin.password')) {
             return back()->withErrors([
                 'password' => 'Invalid password.',
             ]);
