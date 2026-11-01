@@ -27,6 +27,14 @@
             Change prices
         </a>
 
+        <a href="{{ route('admin.logout') }}"
+           class="px-8 py-4 bg-green-600 text-white rounded-lg text-xl font-semibold shadow hover:bg-green-700 transition">
+            Logout
+        </a>
+
+
+
+
 
     </div>
 @endsection
