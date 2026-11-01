@@ -2,6 +2,7 @@
 
 
 use App\Http\Controllers\Admin\AdminAuthController;
+use App\Http\Controllers\Admin\ProductPricingController;
 use App\Http\Controllers\Admin\StripeDashboardController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\WelcomeController;
@@ -155,7 +156,24 @@ Route::prefix('admin/stripe')
 
         Route::get('/transactions/{id}', [StripeDashboardController::class, 'transactionShow'])
             ->name('admin.stripe.transactions.show');
+
     });
+
+Route::middleware('admin.password')
+    ->group(function () {
+
+        Route::get('/admin/products/pricing', [
+            ProductPricingController::class,
+            'edit'
+        ])->name('admin.products.edit');
+
+        Route::post('/admin/products/pricing', [
+            ProductPricingController::class,
+            'update'
+        ])->name('admin.products.update');
+
+    });
+
 
 Route::get('/admin/login', [AdminAuthController::class, 'showLogin'])
     ->name('admin.login');
