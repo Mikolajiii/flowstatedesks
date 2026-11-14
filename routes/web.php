@@ -196,3 +196,15 @@ Route::get('/cart', [CartController::class, 'view'])->name('cart.view');
 
 //test sendgrid
 Route::get('/sendgrid-test', [\App\Http\Controllers\SendGridTestController::class, 'test']);
+
+use App\Http\Controllers\Admin\ProductController;
+
+Route::get(
+    '/admin/products/pricing',
+    [ProductController::class, 'pricing']
+)->name('admin.products.pricing');
+
+Route::post(
+    '/admin/products/pricing',
+    [ProductController::class, 'updatePrices']
+)->name('admin.products.update');

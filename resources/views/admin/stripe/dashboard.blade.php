@@ -22,7 +22,7 @@
             Main Web Page
         </a>
 
-        <a href="{{ route('admin.products.edit') }}"
+        <a href="{{ route('admin.products.pricing') }}"
            class="px-8 py-4 bg-green-600 text-white rounded-lg text-xl font-semibold shadow hover:bg-green-700 transition">
             Change prices
         </a>

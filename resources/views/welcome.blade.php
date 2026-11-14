@@ -272,7 +272,7 @@
 
                     <div class="flex items-center gap-4">
           <span class="text-xl font-semibold text-neutral-900">
-             ${{ number_format($products['pro']['price'] / 100, 2) }}
+             ${{ $products['pro']->price }}
            {{--  $1,499--}}
           </span>
 
@@ -453,7 +453,7 @@
 
                     <div class="flex items-center gap-4">
                     <span class="text-xl font-semibold text-neutral-900">
-                         ${{ number_format($products['mini']['price'] / 100, 2) }}
+                        ${{ number_format($products['mini']->price / 100, 2) }}
                         {{--$1,099--}}
                     </span>
 
@@ -643,7 +643,7 @@
 
                     <div class="flex items-center gap-4">
           <span class="text-xl font-semibold text-neutral-900">
-             ${{ number_format($products['sidecar']['price'] / 100, 2) }}
+            ${{ number_format($products['sidecar']->price / 100, 2) }}
            {{-- $449.00--}}
           </span>
 

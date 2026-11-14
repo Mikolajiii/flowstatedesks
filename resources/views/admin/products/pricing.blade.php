@@ -21,21 +21,18 @@
 
 
 
-            <form
-                method="POST"
-                action="{{ route('admin.products.update') }}"
-            >
+            <form method="POST" action="{{ route('admin.products.update') }}">
                 @csrf
 
-                @foreach($products as $key => $product)
+                @foreach($products as $product)
 
                     <div
                         class="card border-0 shadow-sm mb-4"
                         style="
-                        border-radius:20px;
-                        border:2px solid #dbeafe !important;
-                        background:#ffffff;
-                    "
+                border-radius:20px;
+                border:2px solid #dbeafe !important;
+                background:#ffffff;
+            "
                     >
 
                         <div class="card-body p-4">
@@ -43,17 +40,17 @@
                             <div class="text-center">
 
                                 <img
-                                    src="{{ asset($product['image']) }}"
-                                    alt="{{ $product['name'] }}"
+                                    src="{{ asset($product->image) }}"
+                                    alt="{{ $product->name }}"
                                     class="img-fluid mb-3"
                                     style="
-                                    max-height:180px;
-                                    object-fit:contain;
-                                "
+                            max-height:180px;
+                            object-fit:contain;
+                        "
                                 >
 
                                 <h4 class="fw-bold mb-3">
-                                    {{ $product['name'] }}
+                                    {{ $product->name }}
                                 </h4>
 
                                 <div
@@ -70,15 +67,16 @@
                                     <input
                                         type="number"
                                         step="0.01"
+                                        min="0"
                                         class="form-control text-center fw-bold"
-                                        name="price[{{ $key }}]"
-                                        value="{{ number_format($product['price'] / 100, 2, '.', '') }}"
+                                        name="products[{{ $product->id }}]"
+                                        value="{{ number_format($product->price / 100, 2, '.', '') }}"
                                         style="
-                                        border:2px solid #3b82f6;
-                                        border-radius:12px;
-                                        height:55px;
-                                        font-size:1.2rem;
-                                    "
+                                border:2px solid #3b82f6;
+                                border-radius:12px;
+                                height:55px;
+                                font-size:1.2rem;
+                            "
                                     >
 
                                 </div>
@@ -97,12 +95,12 @@
                         type="submit"
                         class="btn btn-lg px-5 py-3 fw-bold"
                         style="
-                        background:#2563eb;
-                        border:2px solid #1d4ed8;
-                        color:white;
-                        border-radius:14px;
-                        min-width:220px;
-                    "
+                background:#2563eb;
+                border:2px solid #1d4ed8;
+                color:white;
+                border-radius:14px;
+                min-width:220px;
+            "
                     >
                         Save Prices
                     </button>
@@ -111,6 +109,10 @@
 
             </form>
 
+            <a href="{{ route('home') }}"
+               class="px-8 py-4 bg-green-600 text-white rounded-lg text-xl font-semibold shadow hover:bg-green-700 transition">
+                Main Web Page
+            </a>
         </div>
 
     </div>
