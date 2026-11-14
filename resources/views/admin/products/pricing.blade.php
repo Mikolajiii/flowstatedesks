@@ -19,7 +19,21 @@
             </div>
 
 
-
+            @if(session('success'))
+                <div
+                    class="mb-4 p-4 text-center"
+                    style="
+                background:#ecfdf5;
+                border:2px solid #10b981;
+                color:#065f46;
+                border-radius:16px;
+                font-weight:600;
+                font-size:1rem;
+            "
+                >
+                    ✅ {{ session('success') }}
+                </div>
+            @endif
 
             <form method="POST" action="{{ route('admin.products.update') }}">
                 @csrf
