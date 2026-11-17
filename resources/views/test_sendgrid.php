@@ -10,7 +10,7 @@ $success = $sendgrid->sendTemplate(
     "mikolajkondakow@gmail.com",
     "Flow State Customer",
     [
-        'message' => "Payment completed. Let me know if you got this email",
+        'message' => "You have an order. Let me know if you got this email",
         'order_id' => 12345,
         'total' => 123.45,
 

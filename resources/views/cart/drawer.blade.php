@@ -189,13 +189,18 @@
             class="fixed inset-0 bg-black/50 z-[999] flex items-center justify-center"
         >
             <div class="bg-white p-6 rounded-xl shadow-xl text-center w-64">
-                <button>
-                <p class="text-lg font-semibold text-neutral-900 mb-4">Cart is Empty</p>
+
+                <p class="text-lg font-semibold text-neutral-900 mb-4">
+                    Cart is Empty
+                </p>
+
+                <button
                     class="px-4 py-2 bg-neutral-900 text-white rounded-lg"
                     @click="showEmptyPopup = false"
                 >
                     OK
                 </button>
+
             </div>
         </div>
 

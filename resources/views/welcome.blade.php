@@ -1,6 +1,12 @@
 @extends('layouts.master')
 
 @section('content')
+
+    @php
+        $pro = $products['pro'];
+        $mini = $products['mini'];
+        $sidecar = $products['sidecar'];
+    @endphp
     <div x-data></div>
 
     <!-- ⭐ MUST BE HERE -->
@@ -272,7 +278,7 @@
 
                     <div class="flex items-center gap-4">
           <span class="text-xl font-semibold text-neutral-900">
-              ${{ number_format($products['pro']->price / 100, 2) }}
+             ${{ number_format($pro->price / 100, 2) }}
            {{--  $1,499--}}
           </span>
 
@@ -307,7 +313,7 @@
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
             },
             body: JSON.stringify({
-                product: 'pro',
+               product: {{ $pro->id }},
                 qty: $event.target.qty.value
             })
         })
@@ -453,8 +459,7 @@
 
                     <div class="flex items-center gap-4">
                     <span class="text-xl font-semibold text-neutral-900">
-                        ${{ number_format($products['mini']->price / 100, 2) }}
-
+                     ${{ number_format($mini->price / 100, 2) }}
                     </span>
 
                     </div>
@@ -487,7 +492,7 @@
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
             },
             body: JSON.stringify({
-                product: 'mini',
+                 product: {{ $mini->id }},
                 qty: $event.target.qty.value
             })
         })
@@ -643,8 +648,9 @@
 
                     <div class="flex items-center gap-4">
           <span class="text-xl font-semibold text-neutral-900">
-            ${{ number_format($products['sidecar']->price / 100, 2) }}
-           {{-- $449.00--}}
+           ${{ number_format($sidecar->price / 100, 2) }}
+
+              {{-- $449.00--}}
           </span>
 
                     </div>
@@ -655,7 +661,7 @@
                         </h3>
                         <p>Wood – Pre-lacquered Baltic birch plywood</p>
                         <p>Hardware – German Engineered Rampa Inserts and Bolts</p>
-                        <p> Keyboard Tray Sliders – Lee Valley (75 lbs.) Fully extendable Sliders</p>
+
                         <P>Rails – SPCC Steel with black powder coating</p>
                         <div class="grid grid-cols-2 gap-4 text-lg text-neutral-700">
                             <div>
@@ -678,7 +684,7 @@
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
             },
             body: JSON.stringify({
-                product: 'sidecar',
+               product: {{ $sidecar->id }},
                 qty: $event.target.qty.value
             })
         })

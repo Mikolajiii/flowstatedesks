@@ -15,12 +15,13 @@ class SendGridTestController extends Controller
 
         $success = $sendgrid->sendTemplate(
             'WELCOME_MESSAGE',
-            'mikadoneng@gmail.com',   // main recipient
+            'michaelkondakow@gmail.com',   // main recipient
             'Mickey',
             [
-                'message'  => "Payment completed. Let me know if you got this email",
+                'message'  => "Michael you have a new flowstate desk order! Please check your dashboard for details.",
                 'order_id' => 12345,
                 'total'    => 123.45,
+                'items'=>"hello i have items"
             ],
 
         );

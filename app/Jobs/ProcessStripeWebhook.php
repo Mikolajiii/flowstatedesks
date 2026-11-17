@@ -10,7 +10,7 @@ use Stripe\Stripe;
 use Stripe\Checkout\Session;
 use Stripe\Charge;
 use Stripe\PaymentIntent;
-
+use App\Services\SendGridService;
 class ProcessStripeWebhook extends ProcessStripeWebhookJob
 {
     public function handle()
@@ -307,6 +307,36 @@ class ProcessStripeWebhook extends ProcessStripeWebhookJob
                 */
 
                 $customerDetails = $object['customer_details'] ?? [];
+                $items = $object['metadata']['items'] ?? '[]';
+            try {
+
+                $sendgrid = app(SendGridService::class);
+
+                $sendgrid->sendTemplate(
+                    'WELCOME_MESSAGE',
+                    config('my_mail_address.my_email'),
+                    'Mickey',
+                    [
+                        'message' => 'Michael you have a new FlowState Desk order! Please check your dashboard for details.',
+
+                        'order_id' => $sessionId,
+                        'total' => number_format(($object['amount_total'] ?? 0) / 100, 2),
+                        'items' => $items,
+                       ]
+                );
+
+                Log::info('SENDGRID ORDER EMAIL SENT', [
+                    'session_id' => $sessionId,
+                    'total' => $object['amount_total'] ?? null,
+                ]);
+
+            } catch (\Throwable $e) {
+
+                Log::error('SENDGRID ORDER EMAIL FAILED', [
+                    'session_id' => $sessionId,
+                    'message' => $e->getMessage(),
+                ]);
+            }
 
                 Log::info('STRIPE CHECKOUT CUSTOMER INFORMATION', [
                     'session_id' => $sessionId,
@@ -372,9 +402,10 @@ class ProcessStripeWebhook extends ProcessStripeWebhookJob
             */
 
             case 'charge.succeeded':
-            case 'charge.succeeded':
+            case 'v1.charge.succeeded':
 
-                Log::info('CHARGE SUCCEEDED', [
+
+            Log::info('CHARGE SUCCEEDED', [
                     'charge' => $object,
                 ]);
 
