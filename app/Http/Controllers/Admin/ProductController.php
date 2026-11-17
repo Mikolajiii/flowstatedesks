@@ -17,7 +17,7 @@ class ProductController extends Controller
 
     public function updatePrices(Request $request)
     {
-        foreach ($request->products as $productId => $price) {
+        foreach ($request->products ?? [] as $productId => $price) {
 
             Product::where('id', $productId)
                 ->update([

@@ -3,22 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class ProductPricingController extends Controller
 {
     public function edit()
     {
-        clearstatcache();
-
-        if (function_exists('opcache_invalidate')) {
-            opcache_invalidate(
-                config_path('products.php'),
-                true
-            );
-        }
-
-        $products = require config_path('products.php');
+        $products = Product::orderBy('id')->get();
 
         return view(
             'admin.products.pricing',
@@ -28,32 +20,12 @@ class ProductPricingController extends Controller
 
     public function update(Request $request)
     {
-        $products = require config_path('products.php');
+        foreach ($request->products as $productId => $price) {
 
-        foreach ($products as $key => &$product) {
-
-            $product['price'] = (int) round(
-                $request->input("price.$key") * 100
-            );
-        }
-
-        $content =
-            "<?php\n\nreturn "
-            . var_export($products, true)
-            . ";\n";
-
-        file_put_contents(
-            config_path('products.php'),
-            $content
-        );
-
-        clearstatcache();
-
-        if (function_exists('opcache_invalidate')) {
-            opcache_invalidate(
-                config_path('products.php'),
-                true
-            );
+            Product::where('id', $productId)
+                ->update([
+                    'price' => (int) round($price * 100),
+                ]);
         }
 
         session([

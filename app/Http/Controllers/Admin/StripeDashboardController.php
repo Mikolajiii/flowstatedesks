@@ -59,6 +59,8 @@ class StripeDashboardController extends Controller
             $metadata = $obj['metadata'] ?? [];
 
             $order->product = $metadata['product'] ?? null;
+            $order->product_id = $metadata['product_id'] ?? null;
+
             $order->description = $metadata['description'] ?? null;
             $order->price_id = $metadata['price_id'] ?? null;
 
