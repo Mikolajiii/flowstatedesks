@@ -321,7 +321,7 @@ class ProcessStripeWebhook extends ProcessStripeWebhookJob
 
                         'order_id' => $sessionId,
                         'total' => number_format(($object['amount_total'] ?? 0) / 100, 2),
-                        'items' => $items,
+                       // 'items' => $items,
                        ]
                 );
 

@@ -21,7 +21,7 @@ class SendGridTestController extends Controller
                 'message'  => "Michael you have a new flowstate desk order! Please check your dashboard for details.",
                 'order_id' => 12345,
                 'total'    => 123.45,
-                'items'=>"hello i have items"
+               // 'items'=>"hello i have items"
             ],
 
         );
