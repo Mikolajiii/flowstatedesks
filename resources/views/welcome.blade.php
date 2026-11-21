@@ -136,61 +136,73 @@
             <!-- HERO CONTENT -->
             <div
                 class="
-            relative z-10
-            max-w-7xl
-            mx-auto
+        relative z-10
+        max-w-7xl
+        mx-auto
 
-            flex flex-col
-            md:grid md:grid-cols-2
-            lg:flex lg:flex-row
+        flex flex-col
+        md:grid md:grid-cols-2
+        lg:flex lg:flex-row
 
-            items-center
-            lg:items-start
+        items-center
+        lg:items-start
 
-            px-6
-            md:px-12
-            lg:px-4
+        px-6
+        md:px-12
+        lg:px-4
 
-            mt-16
-            md:mt-24
-            lg:mt-32
-        "
+        mt-16
+        md:mt-24
+        lg:mt-32
+    "
             >
 
                 <!-- LEFT COLUMN -->
                 <div
                     class="
-                w-full
-                text-center
-                md:text-left
-            "
+            w-full
+            text-center
+            md:text-left
+        "
                 >
                     <h1
                         class="
-    text-2xl
-    sm:text-3xl
-    md:text-4xl
-    lg:text-5xl
-    xl:text-5xl
-    2xl:text-7xl
+                text-2xl
+                sm:text-3xl
+                md:text-4xl
+                lg:text-5xl
+                xl:text-5xl
+                2xl:text-7xl
 
-    font-semibold
-    leading-tight
-    text-white
-    drop-shadow-lg
-    text-center
-"
+                font-semibold
+                leading-tight
+                text-white
+                drop-shadow-lg
+                text-center
+            "
                     >
-                       Studio furniture built<br>
+                        Studio furniture built<br>
                         by Creators for Creators
-                        </h1>
+                    </h1>
+
+                    <!-- TESTIMONIAL -->
+                    <div class="mt-50 max-w-4xl mx-auto text-center">
+                        <p class="text-lg md:text-xl lg:text-2xl text-white italic font-light leading-relaxed drop-shadow-lg">
+                            “Flow State Desks offer exactly what I look for in a studio desk,
+                            functionality, durability and style.”
+                        </p>
+
+                        <p class="mt-4 text-white/90 text-sm md:text-base lg:text-lg font-semibold">
+                            Gavin Brown, Three Days Grace, Billy Talent
+                        </p>
+                    </div>
+
                 </div>
 
                 <!-- RIGHT COLUMN -->
                 <div class="hidden md:block"></div>
 
             </div>
-
         </section>
 
 
