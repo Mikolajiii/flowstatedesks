@@ -186,7 +186,7 @@
                     </h1>
 
                     <!-- TESTIMONIAL -->
-                    <div class="mt-25 max-w-4xl mx-auto text-center">
+                    <div class="mt-10 max-w-4xl mx-auto text-center">
                         <p class="text-lg md:text-xl lg:text-2xl text-white italic font-light leading-relaxed drop-shadow-lg">
                             “Flow State Desks offer exactly what I look for in a studio desk,
                             functionality, durability and style.”
