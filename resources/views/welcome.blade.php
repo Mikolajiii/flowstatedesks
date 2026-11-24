@@ -178,14 +178,14 @@
                     <!-- Main Image -->
                     <div class="rounded-3xl overflow-hidden h-125 relative">
 
-                        <div class="rounded-3xl overflow-hidden h-125 relative bg-white flex items-center justify-center">
+
                             <img
                                 alt="FlowState Pro"
                                 src="{{ asset('images/Product_photos/flowstate_pro/1_FLOWPRO_EDITED.webp') }}"
-                                class="max-w-[95%] max-h-[95%] object-contain"
+                                class=" max-h-[90%] w-full h-full object-cover"
                                 id="pro-main-image"
                             />
-                        </div>
+
 
                         <button id="pro-zoom-btn"
                                 class="absolute top-4 right-4 bg-neutral-900/70 text-white p-2 rounded-full hover:bg-neutral-900 transition shadow-lg">
