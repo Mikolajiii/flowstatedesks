@@ -134,53 +134,10 @@
             </div>
 
             <!-- HERO CONTENT -->
-            <div
-                class="
-        relative z-10
-        max-w-7xl
-        mx-auto
-
-        flex flex-col
-        md:grid md:grid-cols-2
-        lg:flex lg:flex-row
-
-        items-center
-        lg:items-start
-
-        px-6
-        md:px-12
-        lg:px-4
-
-        mt-16
-        md:mt-24
-        lg:mt-32
-    "
-            >
+            <div class=" relative z-10 max-w-7xl mx-auto flex flex-col md:grid md:grid-cols-2 lg:flex lg:flex-row items-center lg:items-start px-6 md:px-12 lg:px-4 mt-16 md:mt-24 lg:mt-32 ">
 
                 <!-- LEFT COLUMN -->
-                <div
-                    class="
-            w-full
-            text-center
-            md:text-left
-        "
-                >
-                    <h1
-                        class="
-                text-2xl
-                sm:text-3xl
-                md:text-4xl
-                lg:text-5xl
-                xl:text-5xl
-                2xl:text-7xl
-
-                font-semibold
-                leading-tight
-                text-white
-                drop-shadow-lg
-                text-center
-            "
-                    >
+                <div class=" w-full text-center md:text-left "><h1 class=" text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-5xl 2xl:text-7xl font-semibold leading-tight text-white drop-shadow-lg text-center ">
                         Studio furniture built<br>
                         by Creators for Creators
                     </h1>
@@ -219,7 +176,7 @@
                 <div class="flex-1 space-y-4">
 
                     <!-- Main Image -->
-                    <div class="rounded-3xl overflow-hidden h-[500px] relative">
+                    <div class="rounded-3xl overflow-hidden h-125 relative">
 
                         <img
                             alt="FlowState Pro"
@@ -406,7 +363,7 @@
                 <div class="flex-1 space-y-4">
 
                     <!-- Main Image -->
-                    <div class="rounded-3xl overflow-hidden h-[500px] relative">
+                    <div class="rounded-3xl overflow-hidden h-125 relative">
 
 
                         <img
@@ -555,7 +512,7 @@
     <img
         src="https://flagcdn.com/w20/ca.png"
         alt="Canada"
-        class="w-8 h-4 mr-2 flex-shrink-0 rounded-sm"
+        class="w-8 h-4 mr-2 shrink-0 rounded-sm"
     >
     In stock — Free Shipping
 </span>
@@ -590,7 +547,7 @@
                 <div class="flex-1 space-y-4">
 
                     <!-- Main Image -->
-                    <div class="rounded-3xl overflow-hidden h-[500px] relative">
+                    <div class="rounded-3xl overflow-hidden h-125 relative">
                         <img
                             alt="side car"
                             src="{{  asset('images/Product_photos/flowstate_sidecar/1_RACK_EDITED.webp') }}"
@@ -746,7 +703,7 @@
     <img
         src="https://flagcdn.com/w20/ca.png"
         alt="Canada"
-        class="w-8 h-4 mr-2 flex-shrink-0 rounded-sm"
+        class="w-8 h-4 mr-2 shrink-0 rounded-sm"
     >
     In stock — Free Shipping
 </span>
@@ -919,15 +876,17 @@
                 if (!section) return; // skip if section doesn't exist
 
                 const mainImage = section.querySelector(".rounded-3xl img");
-                const thumbs = Array.from(section.querySelectorAll(".grid img"));
+                const thumbs = Array.from(section.querySelectorAll(".thumb"));
 
                 let index = 0;
 
                 // Click main image → go to next thumbnail
-                mainImage.addEventListener("click", () => {
-                    index = (index + 1) % thumbs.length;
-                    mainImage.src = thumbs[index].src;
-                });
+                if (mainImage) {
+                    mainImage.addEventListener("click", () => {
+                        index = (index + 1) % thumbs.length;
+                        mainImage.src = thumbs[index].src;
+                    });
+                }
 
                 // Click thumbnail → update main image
                 thumbs.forEach((thumb, i) => {
@@ -948,7 +907,12 @@
 
                 const section = document.querySelector(`#${sectionId}`);
                 const mainImage = section.querySelector(`#${mainId}`);
-                const thumbs = Array.from(section.querySelectorAll(".thumb"));
+                if (mainImage) {
+                    mainImage.addEventListener("click", () => {
+                        index = (index + 1) % thumbs.length;
+                        mainImage.src = thumbs[index].src;
+                    });
+                }
 
                 let index = 0;
 
