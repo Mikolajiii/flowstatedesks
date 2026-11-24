@@ -208,3 +208,8 @@ Route::post(
     '/admin/products/pricing',
     [ProductController::class, 'updatePrices']
 )->name('admin.products.update');
+
+
+Route::get('/success-preview', function () {
+    return view('success');
+});

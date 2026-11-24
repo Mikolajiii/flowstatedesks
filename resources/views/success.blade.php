@@ -2,81 +2,82 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Payment Successful</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed | FlowState</title>
 
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
-
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #4CAF50, #2E7D32);
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .card {
-            background: #ffffff;
-            color: #333;
-            padding: 40px 50px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            text-align: center;
-            max-width: 420px;
-            animation: fadeIn 0.8s ease-out;
-        }
-
-        .icon {
-            font-size: 64px;
-            color: #4CAF50;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        p {
-            font-size: 16px;
-            margin-bottom: 25px;
-            font-weight: 400;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 22px;
-            background: #4CAF50;
-            color: #fff;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: background 0.3s;
-        }
-
-        .btn:hover {
-            background: #43A047;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+    @vite(['resources/css/app.css'])
 </head>
+<body class="min-h-screen bg-neutral-50">
 
-<body>
-<div class="card">
-    <div class="icon">✔️</div>
-    <h1>Payment Successful!</h1>
-    <p>Thank you for your purchase. Your transaction has been completed.</p>
-    <a href="/" class="btn">Return Home</a>
+<div class="min-h-screen flex items-center justify-center px-6 py-12">
+
+    <div class="w-full max-w-xl">
+
+        <div class="bg-white rounded-3xl shadow-xl border border-neutral-200 overflow-hidden">
+
+            <!-- Success Header -->
+            <div class="bg-green-50 border-b border-green-100 px-8 py-8 text-center">
+
+                <div class="mx-auto flex items-center justify-center w-20 h-20 rounded-full bg-green-500 shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="w-10 h-10 text-white"
+                         fill="none"
+                         viewBox="0 0 24 24"
+                         stroke="currentColor"
+                         stroke-width="2">
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+
+                <h1 class="mt-6 text-3xl font-bold text-neutral-900">
+                    Thank You for Your Order
+                </h1>
+
+                <p class="mt-3 text-neutral-600 leading-relaxed">
+                    Your payment has been successfully received and your order is now being processed.
+                </p>
+
+            </div>
+
+            <!-- Content -->
+            <div class="px-8 py-8">
+
+                <div class="space-y-4">
+
+                    <p class="text-neutral-700 leading-relaxed">
+                        We sincerely appreciate your support and are excited to get your order on its way.
+                    </p>
+
+                    <p class="text-neutral-700 leading-relaxed">
+                        Our team will begin preparing your items immediately and will ship them as soon as possible.
+                    </p>
+
+                    <p class="text-neutral-700 leading-relaxed">
+                        Once your order ships, you'll receive a confirmation email with tracking information.
+                    </p>
+
+                </div>
+
+                <div class="mt-10 flex flex-col sm:flex-row gap-4">
+
+                    <a href="/"
+                       class="flex-1 text-center px-6 py-3 rounded-full bg-neutral-900 text-white font-medium hover:bg-neutral-800 transition">
+                        Return Home
+                    </a>
+
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
+
 </body>
 </html>
