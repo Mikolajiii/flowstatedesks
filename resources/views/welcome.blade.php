@@ -331,13 +331,13 @@
                                     </button>
                                 </div>
                                 <span class="mt-3 inline-flex items-center justify-center whitespace-nowrap text-purple-500 text-md font-medium px-2 py-0.5 rounded-full">
-    <img
-        src="https://flagcdn.com/w20/ca.png"
-        alt="Canada"
-        class="w-8 h-4 mr-2 flex-shrink-0 rounded-sm"
-    >
-    In stock — Free Shipping
-</span>
+                                    <img
+                                        src="https://flagcdn.com/w20/ca.png"
+                                        alt="Canada"
+                                        class="w-8 h-4 mr-2 flex-shrink-0 rounded-sm"
+                                    >
+                                    In stock — Free Shipping
+                                </span>
                                 </div>
                             </div>
                         </div>
@@ -371,7 +371,8 @@
                         <img
                             alt="FlowState Mini"
                             src="{{ asset('images/Product_photos/flowstate_mini/1_FLOWMINI_EDITED.webp') }}"
-                            class="w-full h-full object-cover"
+
+                            class=" max-h-[90%] w-full h-full object-cover"
                             id="mini-main-image"
                         />
 
